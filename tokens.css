@@ -1,0 +1,52 @@
+/* =============================================================
+   デザイントークン（色・余白・書体）
+   ★デザイン確定時は原則このファイルだけを差し替えます
+   コンセプト: 黒基調 / 明朝の見出しで高級感 / 写真は面で見せる
+   ============================================================= */
+:root{
+  /* ---- 紙面（出力）---- */
+  --paper-w: 297mm;          /* A4 横 */
+  --paper-h: 210mm;
+  --paper-pad-x: 9mm;
+  --paper-pad-y: 6mm;
+  --cell-gap: 2.4mm;         /* カード間の間隔 */
+  --card-radius: 1.4mm;
+
+  /* ---- 紙面の色（黒基調）---- */
+  --paper:     #0a0a0c;      /* 地 */
+  --paper-2:   #121216;      /* 面（カード地・微妙な差） */
+  --ink:       #ffffff;
+  --ink-sub:   #9b9ba3;
+  --line:      rgba(255,255,255,.16);
+  --line-soft: rgba(255,255,255,.08);
+  --gold:      #c9ab6d;      /* 唯一の彩り。使いすぎない */
+  --accent-2:  #e0b877;      /* リード文の強調 */
+
+  /* ---- 画面UI（ツール側も黒基調で揃える）---- */
+  --ui-bg:     #08080a;
+  --ui-panel:  #101014;
+  --ui-panel-2:#17171d;
+  --ui-line:   rgba(255,255,255,.10);
+  --ui-text:   #e9e9ee;
+  --ui-sub:    #8b8b95;
+  --radius-ui: 8px;
+
+  /* ---- スタートページ ---- */
+  --site-bg:   #05060a;
+  --site-bg-2: #0a0c12;
+  --site-fg:   #ffffff;
+  --site-fg-sub: rgba(255,255,255,.60);
+
+  /* スタートページの彩り＝発光する青（黒地の右側から差す光）
+     ★金基調に戻す場合はこの3つを #c9ab6d / #e8d6a8 / #6d5622 に差し替え */
+  --glow-1: #2f7ce0;   /* 主（ボタン・罫のアクセント） */
+  --glow-2: #8fccff;   /* ハイライト（欧文・数字） */
+  --glow-3: #0b3f8f;   /* 影側 */
+  --site-cta:  #2f7ce0;
+
+  /* ---- 書体 ----
+     見出し=明朝（高級感） / 仕様名=ゴシック（視認性） */
+  --font-display: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Georgia", "Times New Roman", serif;
+  --font-ui: "Yu Gothic UI", "Yu Gothic", "Meiryo", "Hiragino Kaku Gothic ProN", sans-serif;
+  --font-name: "Yu Gothic", "Meiryo", "Hiragino Kaku Gothic ProN", sans-serif;
+}

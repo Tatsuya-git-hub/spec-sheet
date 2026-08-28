@@ -1,0 +1,459 @@
+/* =============================================================
+   builder.html 用スタイル
+     [A] 画面UI（操作パネル・ステージ）   ← 印刷されない
+     [B] 紙面 .sheet（A4横 297×210mm）    ← 印刷される
+     [C] 印刷（A4横・フチなし・1枚固定）
+   色・余白・書体は tokens.css の変数で管理
+   ============================================================= */
+
+*{ box-sizing: border-box; }
+html, body{ height: 100%; margin: 0; }
+body{
+  display: flex;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  font-family: var(--font-ui);
+  font-size: 13px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =============================================================
+   [A] 画面UI
+   ============================================================= */
+.editor{
+  width: 384px; flex: 0 0 384px;
+  height: 100vh; overflow-y: auto;
+  padding: 18px 16px 40px;
+  background: var(--ui-panel);
+  border-right: 1px solid var(--ui-line);
+}
+.editor__back{
+  display: inline-block; margin-bottom: 10px;
+  font-size: 11px; letter-spacing: .08em; color: var(--ui-sub); text-decoration: none;
+}
+.editor__back:hover{ color: var(--gold); }
+.editor__head h1{
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: normal; letter-spacing: .12em; margin: 0 0 4px;
+}
+.editor__sub{ margin: 0 0 18px; font-size: 11px; color: var(--ui-sub); }
+
+.panel{
+  border: 1px solid var(--ui-line); border-radius: var(--radius-ui);
+  background: var(--ui-panel-2);
+  padding: 13px; margin-bottom: 12px;
+}
+.panel__title{
+  display: flex; align-items: center; gap: 8px; margin: 0 0 8px;
+  font-size: 12px; font-weight: bold; letter-spacing: .06em;
+}
+.panel__hint{ margin: 4px 0 8px; font-size: 11px; line-height: 1.55; color: var(--ui-sub); }
+.counter{
+  margin-left: auto; font-size: 10.5px; font-weight: normal; color: var(--gold);
+  border: 1px solid rgba(201,171,109,.35); border-radius: 999px; padding: 0 8px;
+}
+
+.field{ display: block; margin-bottom: 8px; }
+.field > span{ display: block; font-size: 10.5px; color: var(--ui-sub); margin-bottom: 3px; }
+.field em{ font-style: normal; opacity: .75; }
+.field input[type=text], .field textarea, .field select{
+  width: 100%; padding: 6px 8px; font: inherit; font-size: 12px;
+  color: var(--ui-text); background: #0b0b0e;
+  border: 1px solid var(--ui-line); border-radius: 4px;
+}
+.field input:focus, .field textarea:focus, .field select:focus{
+  outline: none; border-color: var(--gold);
+}
+.field textarea{ resize: vertical; }
+.grid2{ display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+.grid3{ display: grid; grid-template-columns: .8fr 1fr 1fr; gap: 0 8px; }
+.rangerow{ display: flex; align-items: center; gap: 8px; }
+.rangerow input{ flex: 1; accent-color: var(--gold); }
+.rangerow output{ font-size: 11px; color: var(--gold); min-width: 60px; text-align: right; }
+
+.check{ display: flex; align-items: flex-start; gap: 6px; font-size: 12px; margin-bottom: 6px; cursor: pointer; }
+.check input{ accent-color: var(--gold); margin-top: 3px; }
+.check em{ font-style: normal; font-size: 11px; color: var(--ui-sub); }
+
+.bulk{ display: flex; gap: 6px; flex-wrap: wrap; }
+.bulk button, .add{
+  font: inherit; font-size: 11px; padding: 4px 10px; cursor: pointer;
+  color: var(--ui-text); background: transparent;
+  border: 1px solid var(--ui-line); border-radius: 999px;
+}
+.bulk button:hover, .add:hover{ border-color: var(--gold); color: var(--gold); }
+.add{ width: 100%; margin-top: 8px; border-style: dashed; border-radius: 4px; padding: 6px; }
+
+.primary{
+  width: 100%; font: inherit; font-size: 13px; font-weight: bold; letter-spacing: .08em;
+  padding: 11px; cursor: pointer; color: #16130c;
+  background: linear-gradient(135deg, #e0c68d, var(--gold));
+  border: 0; border-radius: 4px;
+}
+.primary:hover{ filter: brightness(1.08); }
+
+/* ---- 仕様リスト ---- */
+.itemlist{ list-style: none; margin: 8px 0 0; padding: 0; }
+.row{
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 2px; border-top: 1px solid var(--ui-line);
+}
+.row:last-child{ border-bottom: 1px solid var(--ui-line); }
+.row--off{ opacity: .38; }
+.row input[type=checkbox]{ accent-color: var(--gold); }
+.row__name, .row__sub{
+  min-width: 0; font: inherit; font-size: 12px; color: var(--ui-text);
+  background: transparent; border: 1px solid transparent; border-radius: 3px; padding: 2px 4px;
+}
+.row__name{ flex: 1.4; }
+.row__sub{ flex: 1; font-size: 11px; color: var(--ui-sub); }
+.row__name:hover, .row__sub:hover{ border-color: var(--ui-line); }
+.row__name:focus, .row__sub:focus{ border-color: var(--gold); background: #0b0b0e; outline: none; }
+.row__thumb{
+  width: 34px; height: 26px; flex: 0 0 34px; cursor: pointer;
+  border: 1px solid var(--ui-line); border-radius: 3px; overflow: hidden;
+  background: #0b0b0e center/cover no-repeat;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--ui-sub);
+}
+.row__thumb:hover{ border-color: var(--gold); }
+.row__btn{
+  width: 20px; height: 20px; flex: 0 0 20px; padding: 0; cursor: pointer;
+  font-size: 10px; line-height: 1; color: var(--ui-sub);
+  background: transparent; border: 1px solid var(--ui-line); border-radius: 3px;
+}
+.row__btn:hover{ color: var(--ui-text); border-color: var(--gold); }
+.row__btn--del:hover{ color: #e06b5c; border-color: #e06b5c; }
+
+/* ---- ステージ ---- */
+.stage{ flex: 1; min-width: 0; height: 100vh; display: flex; flex-direction: column; }
+.stage__bar{
+  display: flex; align-items: center; gap: 16px; padding: 9px 18px;
+  font-size: 11px; letter-spacing: .1em; color: var(--ui-sub);
+  background: var(--ui-panel); border-bottom: 1px solid var(--ui-line);
+}
+/* 出力テーマの切替（サン / ムーン） */
+.themetoggle{
+  margin-left: auto; display: flex; gap: 3px; padding: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06); border: 1px solid var(--ui-line);
+}
+.themetoggle__btn{
+  width: 27px; height: 27px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  color: var(--ui-sub); background: transparent;
+  transition: background .18s ease, color .18s ease;
+}
+.themetoggle__btn:hover{ color: var(--ui-text); }
+.themetoggle__btn.is-active{
+  color: #16181c; background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,.4);
+}
+.themetoggle__btn[data-theme="dark"].is-active{
+  color: #f4f4f6; background: #26262c;
+  box-shadow: 0 2px 8px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+
+.zoom{ display: flex; align-items: center; gap: 6px; margin-left: 16px; letter-spacing: 0; }
+.zoom input{ width: 140px; accent-color: var(--gold); }
+.stage__scroll{
+  flex: 1; overflow: auto; padding: 28px;
+  background:
+    radial-gradient(900px 400px at 50% -10%, rgba(201,171,109,.07), transparent 70%),
+    var(--ui-bg);
+}
+.sheet-scaler{ transform-origin: top left; width: var(--paper-w); height: var(--paper-h); }
+
+/* =============================================================
+   [B] 紙面（A4 横 1枚・フチなし・黒基調）
+   ============================================================= */
+.sheet{
+  width: var(--paper-w); height: var(--paper-h);
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-ui);
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 10px 50px rgba(0,0,0,.7);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+/* ヘッダー：紙の端まで届く（フチなし） */
+.sheet__head{
+  flex: 0 0 auto;
+  display: flex; align-items: flex-end; gap: 8mm;
+  padding: 5.5mm var(--paper-pad-x) 3.4mm;
+  border-bottom: .25mm solid var(--line);
+}
+.sheet__en{
+  display: block; margin-bottom: 1.2mm;
+  font-family: var(--font-display);
+  font-size: 7pt; letter-spacing: .42em; color: var(--gold);
+}
+.sheet__title{
+  margin: 0; font-family: var(--font-display); font-weight: normal;
+  font-size: 19pt; line-height: 1; letter-spacing: .14em;
+}
+.sheet__prop{
+  margin-left: auto; padding-bottom: .8mm;
+  font-size: 8.5pt; letter-spacing: .04em; text-align: right;
+  color: var(--ink-sub); white-space: pre-line;
+}
+
+/* 内側 */
+.sheet__inner{
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  padding: var(--paper-pad-y) var(--paper-pad-x);
+}
+.sheet__lead{
+  flex: 0 0 auto; margin: 0 0 4mm;
+  font-size: 9pt; line-height: 1.7; letter-spacing: .02em;
+  color: var(--lead-fg, rgba(255,255,255,.82)); white-space: pre-line;
+}
+.sheet__lead:empty{ display: none; }
+.sheet__lead .em{ color: var(--accent-2); font-weight: bold; }
+
+/* 本文：2ブロック横並び（幅配分は JS が flex で指定） */
+.sheet__body{ flex: 1; min-height: 0; display: flex; gap: 6mm; }
+.block{ display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.block--hidden{ display: none; }
+
+/* 見出し行：欧文を上の段に逃がし、
+   「見出し ／ 補足 ／ 件数」を必ず1行に収める（折り返して衝突させない）*/
+.block__head{
+  flex: 0 0 auto; position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "en    en    en"
+    "title note  count";
+  align-items: baseline;
+  column-gap: 2.6mm; row-gap: 1mm;
+  padding-bottom: 1.6mm; margin-bottom: 3mm;
+  border-bottom: .25mm solid var(--line);
+}
+.block__head::after{   /* 見出し下の金の短いライン */
+  content: ""; position: absolute; left: 0; bottom: -.25mm;
+  width: 16mm; height: .5mm; background: var(--gold);
+}
+.block__en{
+  grid-area: en;
+  font-family: var(--font-display);
+  font-size: 6.5pt; letter-spacing: .38em; color: var(--gold);
+}
+.block__title{
+  grid-area: title;
+  margin: 0; font-family: var(--font-display); font-weight: normal;
+  font-size: 13pt; letter-spacing: .1em; line-height: 1;
+  white-space: nowrap;
+}
+/* 補足は幅が足りなければ切る（見出しを折らないため） */
+.block__note{
+  grid-area: note; min-width: 0;
+  font-size: 7.5pt; letter-spacing: .04em; color: var(--ink-sub);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.block__count{
+  grid-area: count; justify-self: end;
+  font-family: var(--font-display);
+  font-size: 8pt; letter-spacing: .1em; color: var(--ink-sub);
+  white-space: nowrap;
+}
+
+/* ---- カードのグリッド（列数・行数は JS が指定 / セルは常に等サイズ） ---- */
+.fill{
+  flex: 1; min-height: 0;
+  display: grid; gap: var(--cell-gap);
+}
+
+/* 写真カード：画像を面で見せ、名称はスクリムに重ねる */
+.card{
+  position: relative; min-width: 0; min-height: 0; overflow: hidden;
+  border-radius: var(--card-radius);
+  background: var(--paper-2) center/cover no-repeat;
+}
+.card__scrim{
+  position: absolute; inset: 0;
+  background: linear-gradient(to top,
+    rgba(0,0,0,.86) 0%, rgba(0,0,0,.62) 22%, rgba(0,0,0,.16) 48%, rgba(0,0,0,0) 72%);
+}
+.card__body{
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 2.2mm 2.4mm;
+}
+.card__name{
+  display: block;
+  font-family: var(--font-name); font-weight: bold;
+  font-size: var(--name-size, 9pt); line-height: 1.25; letter-spacing: .02em;
+  color: var(--name-fg, #fff); text-shadow: 0 .3mm .8mm rgba(0,0,0,.65);
+}
+.card__sub{
+  display: block; margin-top: .7mm;
+  font-size: calc(var(--name-size, 9pt) * .72); line-height: 1.2; letter-spacing: .04em;
+  color: var(--sub-fg, rgba(255,255,255,.72));
+}
+.card--long .card__name{ font-size: calc(var(--name-size, 9pt) * .84); }
+
+/* 画像なし */
+.card--noimg{
+  background: linear-gradient(180deg, #17171c, #0e0e12);
+  border: .25mm solid var(--line-soft);
+}
+.card--noimg::before{
+  content: "NO IMAGE"; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 6pt; letter-spacing: .3em; color: rgba(255,255,255,.22);
+}
+
+/* 文字タイル（付加価値仕様の写真OFF時） */
+.card--text{
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 2mm 3mm;
+  background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  border: .25mm solid var(--line-soft);
+  border-left: .8mm solid var(--gold);
+}
+.card--text .card__body{ position: static; padding: 0; }
+.card--text .card__name{ text-shadow: none; }
+.card--text .card__sub{ color: var(--ink-sub); }
+
+/* 端数マスを埋めるタイル（カードを等サイズに保つため） */
+.card--filler{
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
+  border: .25mm solid var(--line-soft);
+}
+.card--filler span{
+  font-family: var(--font-display);
+  font-size: 6.5pt; letter-spacing: .38em; color: rgba(255,255,255,.18);
+}
+
+/* 空状態 */
+.empty{
+  grid-column: 1 / -1; grid-row: 1 / -1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8.5pt; letter-spacing: .1em; color: var(--ink-sub);
+  border: .25mm dashed var(--line); border-radius: var(--card-radius);
+}
+
+/* フッター */
+.sheet__foot{
+  flex: 0 0 auto; margin-top: 3mm; padding-top: 1.8mm;
+  border-top: .25mm solid var(--line-soft);
+  font-size: 7pt; letter-spacing: .04em; color: var(--ink-sub);
+}
+.sheet__foot--hidden{ display: none; }
+
+/* =============================================================
+   [B-2] 明るい出力テーマ（.sheet[data-theme="light"]）
+   色味の方向: ライトグレーの地 × 完全モノクロ（金は使わない）
+   紙面の変数だけを上書きするので、構造・レイアウトは共通
+   ============================================================= */
+.sheet[data-theme="light"]{
+  --paper:     #d5d5d4;   /* 地：ライトグレー */
+  --paper-2:   #e2e2e1;   /* 面：地よりわずかに明るく */
+  --ink:       #0e0e0e;
+  --ink-sub:   #5a5a5a;
+  --line:      rgba(0,0,0,.30);
+  --line-soft: rgba(0,0,0,.14);
+  --gold:      #121212;   /* 欧文・見出しの短いラインも黒に */
+  --accent-2:  #000000;   /* リード文の強調 */
+  --lead-fg:   #2b2b2b;
+}
+/* 写真カードは写真の上なのでスクリム＋白文字のまま */
+.sheet[data-theme="light"] .card{ background-color: var(--paper-2); }
+
+/* 写真なしカード：明るい面 + 濃い文字 */
+.sheet[data-theme="light"] .card--noimg{
+  --name-fg: var(--ink);
+  --sub-fg: var(--ink-sub);
+  background: linear-gradient(180deg, #e6e6e5, #d2d2d1);
+  border-color: var(--line-soft);
+}
+.sheet[data-theme="light"] .card--noimg::before{ color: rgba(0,0,0,.26); }
+.sheet[data-theme="light"] .card--noimg .card__name{ text-shadow: none; }
+
+/* 文字タイル */
+.sheet[data-theme="light"] .card--text{
+  --name-fg: var(--ink);
+  --sub-fg: var(--ink-sub);
+  background: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.18));
+  border-color: var(--line-soft);
+  border-left-color: #121212;
+}
+/* 端数マスのフィラー */
+.sheet[data-theme="light"] .card--filler{
+  background: linear-gradient(180deg, rgba(0,0,0,.045), rgba(0,0,0,.015));
+  border-color: var(--line-soft);
+}
+.sheet[data-theme="light"] .card--filler span{ color: rgba(0,0,0,.22); }
+
+/* =============================================================
+   [B-3] 小さい画面（タブレット・スマホ）
+     横並びをやめて縦積みにし、紙面を上に貼り付けたまま
+     下の操作パネルをスクロールできるようにする。
+     紙面そのもの（.sheet）の寸法はA4のまま。倍率だけが変わる。
+   ============================================================= */
+@media (max-width: 1080px){
+  html, body{ height: auto; overflow-x: hidden; }   /* 横スクロールを作らせない */
+  body{ flex-direction: column; -webkit-text-size-adjust: 100%; }
+  .editor, .stage{ width: 100%; max-width: 100%; min-width: 0; }
+
+  /* 紙面を上に固定 */
+  .stage{
+    order: -1; height: auto;
+    position: sticky; top: 0; z-index: 20;
+    background: var(--ui-bg);
+    border-bottom: 1px solid var(--ui-line);
+    box-shadow: 0 10px 26px rgba(0,0,0,.55);
+  }
+  /* 1段目＝ラベル、2段目＝テーマ切替と倍率。折り返し任せにしない */
+  .stage__bar{ flex-wrap: wrap; gap: 6px 12px; padding: 8px 12px; }
+  .stage__label{ flex: 1 1 100%; font-size: 10px; }
+  .themetoggle{ margin-left: 0; }
+  .zoom{ margin-left: auto; }
+  .zoom input{ width: 100px; }
+  .stage__scroll{ padding: 12px; max-height: 46vh; }
+
+  /* 操作パネルはページの一部として下に流す */
+  .editor{
+    width: 100%; flex: none; height: auto; overflow: visible;
+    border-right: 0; padding: 16px 14px 56px;
+  }
+
+  /* 指で押せる大きさに */
+  .row{ padding: 7px 2px; gap: 8px; }
+  .row input[type=checkbox]{ width: 18px; height: 18px; margin-top: 0; }
+  .row__thumb{ width: 40px; height: 30px; flex: 0 0 40px; }
+  .row__btn{ width: 27px; height: 27px; flex: 0 0 27px; font-size: 11px; }
+  .bulk button, .add{ padding: 7px 14px; }
+  .primary{ padding: 14px; }
+
+  /* iOSは16px未満の入力欄にフォーカスすると勝手に拡大するので抑える */
+  .field input[type=text], .field textarea, .field select,
+  .row__name, .row__sub{ font-size: 16px; }
+}
+
+@media (max-width: 640px){
+  .grid2, .grid3{ grid-template-columns: 1fr; }
+  .stage__scroll{ max-height: 40vh; padding: 8px; }
+  .editor__head h1{ font-size: 17px; }
+}
+
+/* =============================================================
+   [C] 印刷（A4 横・フチなし・1枚）
+   ============================================================= */
+@page{ size: A4 landscape; margin: 0; }
+
+@media print{
+  html, body{ height: auto; display: block; background: #fff; }
+  .editor, .stage__bar{ display: none !important; }
+  .stage{ height: auto; display: block; }
+  .stage__scroll{ overflow: visible; padding: 0; background: none; }
+  .sheet-scaler{ transform: none !important; width: auto; height: auto; margin: 0 !important; }
+  .sheet{
+    box-shadow: none; border: 0;
+    width: var(--paper-w);
+    height: calc(var(--paper-h) - 0.4mm);  /* 端数で2ページ目が出るのを防ぐ */
+    break-after: avoid; page-break-after: avoid;
+  }
+  *{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SPEC SHEET | 仕様一覧シート作成</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="start.css">
+</head>
+<body>
+
+<!-- 背景ビジュアル（写真を入れる場合は start.css の --hero-image を差し替え） -->
+<div class="bg" aria-hidden="true">
+  <div class="bg__image"></div>
+  <div class="bg__veil"></div>
+  <div class="bg__grain"></div>
+</div>
+
+<!-- ============ 浮遊するガラスナビ ============ -->
+<header class="nav" id="nav">
+  <a class="nav__logo" href="index.html">
+    <span class="nav__mark"></span>
+    <span class="nav__wordmark">SPEC<i>SHEET</i></span>
+  </a>
+
+  <nav class="nav__items">
+    <div class="nav__item nav__item--menu">
+      <button class="nav__link" type="button" aria-haspopup="true">使い方 <i class="chev"></i></button>
+      <div class="nav__menu">
+        <a href="#flow"><b>3ステップの流れ</b><span>選ぶ → 確認 → 出力</span></a>
+        <a href="#feature"><b>できること</b><span>2軸・自動組版・写真表示</span></a>
+        <a href="#output"><b>PDF出力の設定</b><span>A4横・フチなし1枚</span></a>
+      </div>
+    </div>
+    <a class="nav__link" href="#feature">できること</a>
+    <a class="nav__link" href="#output">出力</a>
+  </nav>
+
+  <span class="nav__sep"></span>
+  <a class="nav__cta" href="builder.html">つくる</a>
+</header>
+
+<!-- ============ ヒーロー ============ -->
+<section class="hero">
+  <div class="hero__text">
+    <p class="hero__eyebrow">SPECIFICATION SHEET BUILDER</p>
+    <h1 class="hero__title">
+      載せる仕様を<em>選ぶ</em>。
+    </h1>
+    <p class="hero__lead">
+      全戸に標準で備える仕様と、その物件で採用する付加価値仕様。
+      2つの軸をチェックするだけで、フチなしA4横1枚の仕様一覧シートができます。
+    </p>
+    <div class="hero__actions">
+      <a class="btn btn--primary" href="builder.html">仕様一覧をつくる</a>
+      <a class="btn btn--glass" href="#flow">使い方を見る</a>
+    </div>
+
+    <ul class="hero__meta">
+      <li><b>2</b><span>軸で構成</span></li>
+      <li><b>1</b><span>枚に自動組版</span></li>
+      <li><b>0</b><span>余白</span></li>
+    </ul>
+  </div>
+
+  <!-- 出力イメージ（ガラスの額に載せる） -->
+  <div class="hero__visual" aria-hidden="true">
+    <div class="frame">
+      <div class="frame__bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <small>PREVIEW / A4 LANDSCAPE</small>
+      </div>
+      <div class="mock">
+        <div class="mock__head">
+          <div>
+            <span class="mock__en">SPECIFICATIONS</span>
+            <strong>仕様設備一覧</strong>
+          </div>
+          <small>○○様 計画地</small>
+        </div>
+        <div class="mock__body">
+          <div class="mock__col">
+            <div class="mock__label">共通仕様</div>
+            <div class="mock__grid mock__grid--3"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="mock__col mock__col--sub">
+            <div class="mock__label">付加価値仕様</div>
+            <div class="mock__grid mock__grid--2"><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero__badge">A4 ／ 横 ／ フチなし ／ 1枚</div>
+  </div>
+</section>
+
+<!-- ============ 使い方 ============ -->
+<section class="section" id="flow">
+  <p class="section__en">HOW IT WORKS</p>
+  <h2 class="section__title">3ステップ</h2>
+  <p class="section__lead">入力内容はブラウザに自動保存されます。</p>
+
+  <ol class="steps">
+    <li class="glass step">
+      <span class="step__no">01</span>
+      <h3>共通仕様をととのえる</h3>
+      <p>標準の仕様は最初から全て掲載。この物件では載せないものだけ、チェックを外します。</p>
+    </li>
+    <li class="glass step">
+      <span class="step__no">02</span>
+      <h3>付加価値仕様を選ぶ</h3>
+      <p>採用する仕様にチェック。選んだものだけが紙面に並び、件数に応じて自動で組み替わります。</p>
+    </li>
+    <li class="glass step">
+      <span class="step__no">03</span>
+      <h3>PDFで出力する</h3>
+      <p>プレビューがそのまま出力紙面。ボタンひとつでA4横・フチなし1枚のPDFになります。</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ============ できること ============ -->
+<section class="section" id="feature">
+  <p class="section__en">FEATURES</p>
+  <h2 class="section__title">できること</h2>
+  <div class="cards">
+    <article class="glass fcard">
+      <h3>2軸で伝える</h3>
+      <p>「全戸に標準で備える仕様」と「この物件だけの付加価値」を並べ、差が一目で伝わる構成。</p>
+    </article>
+    <article class="glass fcard">
+      <h3>余白をつくらない</h3>
+      <p>掲載件数が何件でも、列数・行数と左右の配分を自動計算。カードは等サイズのまま紙面を埋めます。</p>
+    </article>
+    <article class="glass fcard">
+      <h3>写真で見せる</h3>
+      <p>各仕様に写真を設定。名称はスクリムに重ね、視認性を保ったまま設備の質感を伝えます。</p>
+    </article>
+    <article class="glass fcard">
+      <h3>言葉を選べる</h3>
+      <p>「共通仕様／付加価値仕様」の呼び方は候補から切り替え、または自由入力。</p>
+    </article>
+  </div>
+</section>
+
+<!-- ============ 出力 ============ -->
+<section class="section" id="output">
+  <p class="section__en">OUTPUT</p>
+  <h2 class="section__title">出力の設定</h2>
+  <div class="glass output">
+    <ul class="output__list">
+      <li><span>用紙</span><b>A4</b></li>
+      <li><span>向き</span><b>横</b></li>
+      <li><span>余白</span><b>なし</b></li>
+      <li><span>背景のグラフィック</span><b>ON</b></li>
+    </ul>
+    <p class="output__note">
+      黒地の紙面のため「背景のグラフィック」は必須です。印刷ダイアログの送信先で
+      「PDFに保存」を選べば、そのまま1枚のPDFになります。
+    </p>
+  </div>
+</section>
+
+<!-- ============ 締め ============ -->
+<section class="closing">
+  <h2>この物件の仕様一覧を、いまつくる。</h2>
+  <a class="btn btn--primary btn--lg" href="builder.html">仕様一覧をつくる</a>
+</section>
+
+<footer class="foot">
+  <span>SPEC SHEET — 仕様一覧シート作成ツール</span>
+  <span class="foot__note">社内利用</span>
+</footer>
+
+</body>
+</html>

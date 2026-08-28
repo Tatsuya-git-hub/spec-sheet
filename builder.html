@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>仕様一覧をつくる | SPEC SHEET</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ 操作パネル（印刷されない） ============ -->
+<aside class="editor" id="editor">
+  <header class="editor__head">
+    <a class="editor__back" href="index.html">← スタート</a>
+    <h1>仕様一覧シート</h1>
+    <p class="editor__sub">選んだ仕様がA4横・フチなし1枚のPDFになります</p>
+  </header>
+
+  <!-- 1. 見出し -->
+  <section class="panel">
+    <h2 class="panel__title">1. 見出し</h2>
+    <div class="grid2">
+      <label class="field"><span>タイトル</span><input type="text" id="in-title"></label>
+      <label class="field"><span>欧文<em>（小見出し）</em></span><input type="text" id="in-titleen"></label>
+    </div>
+    <label class="field">
+      <span>物件名 / 宛名<em>（任意）</em></span>
+      <input type="text" id="in-prop" placeholder="例）○○様 計画地（大阪市北区）">
+    </label>
+    <label class="field">
+      <span>リード文<em>（**囲み**で強調・空欄なら非表示）</em></span>
+      <textarea id="in-lead" rows="3"></textarea>
+    </label>
+    <label class="field">
+      <span>フッター<em>（任意）</em></span>
+      <input type="text" id="in-foot" placeholder="例）※仕様は計画段階のものです">
+    </label>
+  </section>
+
+  <!-- 2. 2軸の呼び方 -->
+  <section class="panel">
+    <h2 class="panel__title">2. 2軸の呼び方</h2>
+    <p class="panel__hint">候補を切り替えて紙面で見比べられます。文字は直接編集も可。</p>
+    <label class="field">
+      <span>表現プリセット</span>
+      <select id="in-preset"></select>
+    </label>
+    <div class="grid3">
+      <label class="field"><span>左 欧文</span><input type="text" id="in-cen"></label>
+      <label class="field"><span>左 見出し</span><input type="text" id="in-clabel"></label>
+      <label class="field"><span>左 補足</span><input type="text" id="in-cnote"></label>
+      <label class="field"><span>右 欧文</span><input type="text" id="in-pen"></label>
+      <label class="field"><span>右 見出し</span><input type="text" id="in-plabel"></label>
+      <label class="field"><span>右 補足</span><input type="text" id="in-pnote"></label>
+    </div>
+  </section>
+
+  <!-- 3. 共通仕様 -->
+  <section class="panel">
+    <h2 class="panel__title">
+      <span id="head-common">共通仕様</span>
+      <span class="counter" id="count-common"></span>
+    </h2>
+    <p class="panel__hint">標準は全て掲載。載せない項目のチェックを外します。</p>
+    <div class="bulk">
+      <button type="button" data-bulk="common:all">全て載せる</button>
+      <button type="button" data-bulk="common:none">全て外す</button>
+    </div>
+    <ul class="itemlist" id="list-common"></ul>
+    <button type="button" class="add" data-add="common">＋ 項目を追加</button>
+  </section>
+
+  <!-- 4. 付加価値仕様 -->
+  <section class="panel">
+    <h2 class="panel__title">
+      <span id="head-premium">付加価値仕様</span>
+      <span class="counter" id="count-premium"></span>
+    </h2>
+    <p class="panel__hint">この物件で採用する仕様を選択します。</p>
+    <div class="bulk">
+      <button type="button" data-bulk="premium:all">全て選択</button>
+      <button type="button" data-bulk="premium:none">全て解除</button>
+    </div>
+    <ul class="itemlist" id="list-premium"></ul>
+    <button type="button" class="add" data-add="premium">＋ 項目を追加</button>
+  </section>
+
+  <!-- 5. レイアウト -->
+  <section class="panel">
+    <h2 class="panel__title">5. レイアウト</h2>
+    <label class="field">
+      <span>共通仕様カードの大きさ<em>（付加価値仕様との比）</em></span>
+      <span class="rangerow">
+        <input type="range" id="in-ratio" min="100" max="160" step="2">
+        <output id="ratio-val"></output>
+      </span>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="in-premium-photo" checked>
+      <span>付加価値仕様も写真で並べる<em>（外すと文字タイル）</em></span>
+    </label>
+    <label class="check">
+      <input type="checkbox" id="in-show-sub" checked>
+      <span>カードに補足テキストを出す</span>
+    </label>
+    <p class="panel__hint">
+      カードは各ブロック内で同一サイズ。件数に応じて列数・行数と左右の面積配分を
+      自動計算し、余白を残さず紙面を埋めます。
+    </p>
+    <p class="panel__hint" id="layout-info"></p>
+  </section>
+
+  <!-- 6. 出力 -->
+  <section class="panel">
+    <h2 class="panel__title">6. 出力</h2>
+    <button type="button" class="primary" id="btn-print">PDFで出力 / 印刷</button>
+    <p class="panel__hint">
+      印刷ダイアログで <b>用紙:A4 ／ 向き:横 ／ 余白:なし</b>、
+      <b>「背景のグラフィック」をON</b>（黒地のため必須）。
+    </p>
+    <div class="bulk">
+      <button type="button" id="btn-reload">マスタから再読込</button>
+      <button type="button" id="btn-reset">入力をリセット</button>
+    </div>
+  </section>
+</aside>
+
+<!-- ============ プレビュー ＝ 出力される紙面 ============ -->
+<main class="stage" id="stage">
+  <div class="stage__bar">
+    <span class="stage__label">PREVIEW ／ 出力紙面 A4横・フチなし・1枚</span>
+
+    <!-- 出力テーマの切替 -->
+    <div class="themetoggle" role="group" aria-label="出力テーマ">
+      <button type="button" class="themetoggle__btn" data-theme="light" title="明るい出力">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.2v2.3M12 19.5v2.3M2.2 12h2.3M19.5 12h2.3M5.1 5.1l1.6 1.6M17.3 17.3l1.6 1.6M18.9 5.1l-1.6 1.6M6.7 17.3l-1.6 1.6"/>
+        </svg>
+      </button>
+      <button type="button" class="themetoggle__btn" data-theme="dark" title="黒基調の出力">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+          <path d="M20.5 15.2A8.8 8.8 0 0 1 8.8 3.5 8.8 8.8 0 1 0 20.5 15.2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <label class="zoom">
+      表示倍率
+      <input type="range" id="zoom" min="25" max="130" value="100">
+      <output id="zoom-val">100%</output>
+    </label>
+  </div>
+
+  <div class="stage__scroll">
+    <div class="sheet-scaler" id="scaler">
+      <!-- ▼ ここから下が印刷対象 ------------------------------- -->
+      <article class="sheet" id="sheet" data-theme="dark">
+        <header class="sheet__head">
+          <div class="sheet__headline">
+            <span class="sheet__en" id="sheet-titleen"></span>
+            <h2 class="sheet__title" id="sheet-title"></h2>
+          </div>
+          <div class="sheet__prop" id="sheet-prop"></div>
+        </header>
+
+        <div class="sheet__inner">
+          <p class="sheet__lead" id="sheet-lead"></p>
+
+          <div class="sheet__body" id="sheet-body">
+            <!-- 左ブロック（共通仕様） -->
+            <section class="block" id="block-common">
+              <div class="block__head">
+                <span class="block__en" id="en-common"></span>
+                <h3 class="block__title" id="label-common"></h3>
+                <span class="block__note" id="note-common"></span>
+                <span class="block__count" id="cnt-common"></span>
+              </div>
+              <div class="fill" id="sheet-common"></div>
+            </section>
+
+            <!-- 右ブロック（付加価値仕様） -->
+            <section class="block" id="block-premium">
+              <div class="block__head">
+                <span class="block__en" id="en-premium"></span>
+                <h3 class="block__title" id="label-premium"></h3>
+                <span class="block__note" id="note-premium"></span>
+                <span class="block__count" id="cnt-premium"></span>
+              </div>
+              <div class="fill" id="sheet-premium"></div>
+            </section>
+          </div>
+
+          <footer class="sheet__foot" id="foot-wrap">
+            <span id="sheet-foot"></span>
+          </footer>
+        </div>
+      </article>
+      <!-- ▲ 印刷対象ここまで ------------------------------------ -->
+    </div>
+  </div>
+</main>
+
+<input type="file" id="file-picker" accept="image/*" hidden>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
