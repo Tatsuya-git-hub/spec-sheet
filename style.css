@@ -391,8 +391,11 @@ body{
      横並びをやめて縦積みにし、紙面を上に貼り付けたまま
      下の操作パネルをスクロールできるようにする。
      紙面そのもの（.sheet）の寸法はA4のまま。倍率だけが変わる。
+
+     ★必ず screen に限定する。print を含めると、用紙幅が1080px未満
+       （レターなど）のときに max-height が効いて紙面が途中で切れる。
    ============================================================= */
-@media (max-width: 1080px){
+@media screen and (max-width: 1080px){
   html, body{ height: auto; overflow-x: hidden; }   /* 横スクロールを作らせない */
   body{ flex-direction: column; -webkit-text-size-adjust: 100%; }
   .editor, .stage{ width: 100%; max-width: 100%; min-width: 0; }
@@ -432,7 +435,7 @@ body{
   .row__name, .row__sub{ font-size: 16px; }
 }
 
-@media (max-width: 640px){
+@media screen and (max-width: 640px){
   .grid2, .grid3{ grid-template-columns: 1fr; }
   .stage__scroll{ max-height: 40vh; padding: 8px; }
   .editor__head h1{ font-size: 17px; }
@@ -446,8 +449,15 @@ body{
 @media print{
   html, body{ height: auto; display: block; background: #fff; }
   .editor, .stage__bar{ display: none !important; }
-  .stage{ height: auto; display: block; }
-  .stage__scroll{ overflow: visible; padding: 0; background: none; }
+  /* 画面用の指定を紙面に持ち込まない（高さ制限が残ると途中で切れる） */
+  .stage{
+    height: auto; display: block;
+    position: static; border: 0; box-shadow: none; background: none;
+  }
+  .stage__scroll{
+    overflow: visible; padding: 0; background: none;
+    max-height: none; height: auto;
+  }
   .sheet-scaler{ transform: none !important; width: auto; height: auto; margin: 0 !important; }
   .sheet{
     box-shadow: none; border: 0;
