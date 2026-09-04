@@ -168,6 +168,7 @@ body{
    [B] 紙面（A4 横 1枚・フチなし・黒基調）
    ============================================================= */
 .sheet{
+  position: relative;
   width: var(--paper-w); height: var(--paper-h);
   background: var(--paper); color: var(--ink);
   font-family: var(--font-ui);
@@ -175,6 +176,28 @@ body{
   box-shadow: 0 10px 50px rgba(0,0,0,.7);
   border: 1px solid rgba(255,255,255,.06);
 }
+/* 地の空気：右上から光が差し込み、左下へ落ちていく
+   （黒一色だと重いので、深い青緑の階調をつける）
+   ・グラデーションだけで作るので、印刷しても画像の劣化がない
+   ・中身は z-index:1 で必ずこの層より上に置く */
+.sheet::before{
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    /* 右上の光源 */
+    radial-gradient(46% 40% at 100% 0%,
+      rgba(var(--sheen), .34) 0%, rgba(var(--sheen), .13) 38%, transparent 74%),
+    /* 斜めに落ちる光の帯 */
+    linear-gradient(206deg,
+      transparent 0%, rgba(var(--sheen), .17) 12%, rgba(var(--sheen), .055) 26%,
+      transparent 44%),
+    /* 右下の床の照り返し */
+    radial-gradient(58% 34% at 84% 104%, rgba(var(--sheen), .10), transparent 70%),
+    /* 中央に広がる青緑の空気 */
+    radial-gradient(92% 88% at 64% 54%, rgba(40, 104, 99, .62), transparent 76%),
+    /* 左上へ向かう闇 */
+    radial-gradient(74% 78% at 0% 0%, rgba(0,0,0,.80), transparent 66%);
+}
+.sheet > *{ position: relative; z-index: 1; }
 
 /* ヘッダー：紙の端まで届く（フチなし） */
 .sheet__head{
@@ -264,46 +287,59 @@ body{
   display: grid; gap: var(--cell-gap);
 }
 
-/* 写真カード：画像を面で見せ、名称はスクリムに重ねる */
+/* アイコンカード：上にアイコン、下に名称（写真ではなく図としてそろえる） */
 .card{
   position: relative; min-width: 0; min-height: 0; overflow: hidden;
   border-radius: var(--card-radius);
-  background: var(--paper-2) center/cover no-repeat;
+  background: var(--paper-2);
 }
-.card__scrim{
-  position: absolute; inset: 0;
-  background: linear-gradient(to top,
-    rgba(0,0,0,.86) 0%, rgba(0,0,0,.62) 22%, rgba(0,0,0,.16) 48%, rgba(0,0,0,0) 72%);
+/* カード地は半透明。紙面の光の階調がカードにも乗るので、
+   同じ色のタイルが並んでいるようには見えない */
+.card--icon{
+  display: flex; flex-direction: column;
+  padding: 2.2mm 2mm 2.4mm;
+  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.018));
+  border: .25mm solid var(--line-soft);
 }
-.card__body{
-  position: absolute; left: 0; right: 0; bottom: 0;
-  padding: 2.2mm 2.4mm;
+/* アイコンの面（明るい台座）
+   アイコンは「クリーム地＋濃色の線」なので、黒い紙面に直接置くと
+   画像の地が白い四角として浮く。台座の色を画像の地と合わせて、
+   1枚の板の上に線画が載っているように見せる。
+   contain なので、正方形でない画像でも切れない */
+.card__icon{
+  flex: 1; min-height: 0; margin-bottom: 1.8mm;
+  border-radius: var(--card-radius);
+  background-color: var(--icon-plate, #f7f4ed);
+  background-position: center; background-size: contain; background-repeat: no-repeat;
+  box-shadow: inset 0 0 0 .2mm rgba(0,0,0,.06);
 }
+/* アイコン未設定のときの当たり（あとで画像を入れる場所）。台座は出さない */
+.card__icon--none{
+  position: relative;
+  background: none; box-shadow: none;
+  border: .25mm dashed var(--line-soft);
+}
+.card__icon--none::after{
+  content: "ICON"; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 5.5pt; letter-spacing: .3em; color: rgba(255,255,255,.20);
+}
+.card__body{ flex: 0 0 auto; text-align: center; }
 .card__name{
   display: block;
   font-family: var(--font-name); font-weight: bold;
   font-size: var(--name-size, 9pt); line-height: 1.25; letter-spacing: .02em;
-  color: var(--name-fg, #fff); text-shadow: 0 .3mm .8mm rgba(0,0,0,.65);
+  color: var(--name-fg, #fff);
 }
 .card__sub{
-  display: block; margin-top: .7mm;
+  display: block; margin-top: .6mm; min-height: 1.2em;  /* 空でも行を確保 */
   font-size: calc(var(--name-size, 9pt) * .72); line-height: 1.2; letter-spacing: .04em;
-  color: var(--sub-fg, rgba(255,255,255,.72));
+  color: var(--sub-fg, rgba(255,255,255,.62));
 }
 .card--long .card__name{ font-size: calc(var(--name-size, 9pt) * .84); }
 
-/* 画像なし */
-.card--noimg{
-  background: linear-gradient(180deg, #17171c, #0e0e12);
-  border: .25mm solid var(--line-soft);
-}
-.card--noimg::before{
-  content: "NO IMAGE"; position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 6pt; letter-spacing: .3em; color: rgba(255,255,255,.22);
-}
-
-/* 文字タイル（付加価値仕様の写真OFF時） */
+/* 文字タイル（付加価値仕様のアイコンOFF時） */
 .card--text{
   display: flex; flex-direction: column; justify-content: center;
   padding: 2mm 3mm;
@@ -358,18 +394,24 @@ body{
   --accent-2:  #000000;   /* リード文の強調 */
   --lead-fg:   #2b2b2b;
 }
-/* 写真カードは写真の上なのでスクリム＋白文字のまま */
-.sheet[data-theme="light"] .card{ background-color: var(--paper-2); }
-
-/* 写真なしカード：明るい面 + 濃い文字 */
-.sheet[data-theme="light"] .card--noimg{
+/* 明るいテーマは階調のつけ方が逆（上が明るく、下に落ちる）。
+   青緑の空気は入れず、白い光だけをうすく置く */
+.sheet[data-theme="light"]::before{
+  background:
+    radial-gradient(52% 44% at 100% 0%, rgba(255,255,255,.55), transparent 72%),
+    linear-gradient(206deg, transparent 0%, rgba(255,255,255,.30) 14%, transparent 42%),
+    radial-gradient(80% 76% at 6% 104%, rgba(0,0,0,.10), transparent 68%);
+}
+/* アイコンカード：明るい面 + 濃い文字
+   ★アイコン画像そのものは色を反転できないので、
+     明るいテーマで使うなら濃い色のアイコンを入れてください */
+.sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
   --sub-fg: var(--ink-sub);
-  background: linear-gradient(180deg, #e6e6e5, #d2d2d1);
+  background: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.14));
   border-color: var(--line-soft);
 }
-.sheet[data-theme="light"] .card--noimg::before{ color: rgba(0,0,0,.26); }
-.sheet[data-theme="light"] .card--noimg .card__name{ text-shadow: none; }
+.sheet[data-theme="light"] .card__icon--none::after{ color: rgba(0,0,0,.26); }
 
 /* 文字タイル */
 .sheet[data-theme="light"] .card--text{

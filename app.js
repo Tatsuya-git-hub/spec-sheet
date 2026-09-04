@@ -43,11 +43,20 @@
 
   const presetById = (id) => (window.SPEC_MASTER.labelPresets || []).find((p) => p.id === id) || null;
 
+  /* マスタの項目構成の指紋。data.js の項目を足し引きしたら値が変わるので、
+     保存済みの入力より新しいマスタを優先できる（load() で使用） */
+  function masterSig() {
+    const m = window.SPEC_MASTER;
+    const ids = (g) => m[g].map((s) => `${s.id}:${s.name}`).join(',');
+    return `${ids('common')}|${ids('premium')}`;
+  }
+
   function fromMaster() {
     const m = window.SPEC_MASTER;
     const pr = presetById(m.meta.labelPreset) || m.labelPresets[0];
     return {
       v: 3,
+      sig: masterSig(),
       title: m.meta.title,
       titleEn: m.meta.titleEn || '',
       prop: '',
@@ -57,12 +66,12 @@
       commonEn: pr.cEn,  commonLabel: pr.c,  commonNote: pr.cn,
       premiumEn: pr.pEn, premiumLabel: pr.p, premiumNote: pr.pn,
       theme: 'dark',       // 出力テーマ: 'dark'（黒基調）/ 'light'（明るめ）
-      premiumPhoto: true,  // 付加価値仕様も写真で並べる
+      premiumPhoto: true,  // 付加価値仕様もアイコンで並べる（外すと文字タイル）
       showSub: true,       // カードの補足テキスト
       ratio: 118,          // 共通仕様カードの面積 ÷ 付加価値仕様カードの面積（%）
       // 共通仕様は既定ON / 付加価値仕様は既定OFF
-      common:  m.common.map((s)  => ({ id: s.id, name: s.name, sub: s.sub || '', image: s.image || '', on: true })),
-      premium: m.premium.map((s) => ({ id: s.id, name: s.name, sub: s.sub || '', image: s.image || '', on: false })),
+      common:  m.common.map((s)  => ({ id: s.id, name: s.name, sub: s.sub || '', icon: s.icon || '', on: true })),
+      premium: m.premium.map((s) => ({ id: s.id, name: s.name, sub: s.sub || '', icon: s.icon || '', on: false })),
     };
   }
 
@@ -72,6 +81,8 @@
       if (!raw) return fromMaster();
       const s = JSON.parse(raw);
       if (!s || !Array.isArray(s.common) || !Array.isArray(s.premium)) return fromMaster();
+      // data.js の項目構成が変わっていたら、保存済みの入力は捨てて新しいマスタを使う
+      if (s.sig !== masterSig()) return fromMaster();
       return Object.assign(fromMaster(), s);
     } catch (e) { return fromMaster(); }
   }
@@ -84,18 +95,22 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const leadHtml = (s) => esc(s || '').replace(/\*\*(.+?)\*\*/g, '<span class="em">$1</span>');
 
-  function toDataUrl(file, maxW = 900) {
+  /* アイコン画像を data URL にする
+     ・SVG はそのまま通す（拡大しても劣化しないので加工不要）
+     ・それ以外は縮小して PNG。JPEGにすると背景の透明が黒く潰れるので使わない */
+  function toDataUrl(file, maxW = 512) {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
       fr.onload = () => {
+        if (file.type === 'image/svg+xml') { resolve(fr.result); return; }
         const img = new Image();
         img.onload = () => {
-          const r = Math.min(1, maxW / img.width);
+          const r = Math.min(1, maxW / Math.max(img.width, img.height));
           const c = document.createElement('canvas');
           c.width = Math.round(img.width * r);
           c.height = Math.round(img.height * r);
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          resolve(c.toDataURL('image/jpeg', 0.84));
+          resolve(c.toDataURL('image/png'));
         };
         img.onerror = reject;
         img.src = fr.result;
@@ -155,10 +170,10 @@
 
       const th = document.createElement('span');
       th.className = 'row__thumb';
-      th.title = 'クリックで写真を選択 / Shift+クリックで写真を削除';
-      if (it.image) th.style.backgroundImage = `url("${it.image}")`;
+      th.title = 'クリックでアイコンを選択 / Shift+クリックで削除';
+      if (it.icon) th.style.backgroundImage = `url("${it.icon}")`;
       else th.textContent = '＋';
-      th.onclick = (ev) => { if (ev.shiftKey) { it.image = ''; commit(); } else pickImage(it); };
+      th.onclick = (ev) => { if (ev.shiftKey) { it.icon = ''; commit(); } else pickImage(it); };
 
       const nm = document.createElement('input');
       nm.className = 'row__name'; nm.type = 'text'; nm.value = it.name;
@@ -191,7 +206,7 @@
     commit();
   }
 
-  /* ---------------- 写真の選択 ---------------- */
+  /* ---------------- アイコンの選択 ---------------- */
   let pickTarget = null;
   function pickImage(item) {
     pickTarget = item;
@@ -202,7 +217,7 @@
   $('file-picker').addEventListener('change', async (e) => {
     const f = e.target.files && e.target.files[0];
     if (!f || !pickTarget) return;
-    try { pickTarget.image = await toDataUrl(f); commit(); }
+    try { pickTarget.icon = await toDataUrl(f); commit(); }
     catch (err) { alert('画像を読み込めませんでした'); }
   });
 
@@ -274,8 +289,8 @@
       bc.style.flex = '1 1 100%';
       bp.style.flex = '1 1 100%';
     }
-    if (common.length)  paint($('sheet-common'),  common,  plan.C, 'photo', state.commonEn);
-    if (premium.length) paint($('sheet-premium'), premium, plan.P, state.premiumPhoto ? 'photo' : 'text', state.premiumEn);
+    if (common.length)  paint($('sheet-common'),  common,  plan.C, 'icon', state.commonEn);
+    if (premium.length) paint($('sheet-premium'), premium, plan.P, state.premiumPhoto ? 'icon' : 'text', state.premiumEn);
 
     // --- 情報表示（調整用）---
     const f = (x) => `${Math.round(toMm(x.w))}×${Math.round(toMm(x.h))}mm`;
@@ -291,9 +306,10 @@
     el.style.gridTemplateColumns = `repeat(${box.cols}, 1fr)`;
     el.style.gridTemplateRows    = `repeat(${box.rows}, 1fr)`;
     // カード幅（mm）に応じて名称サイズを決める（視認性の確保）
+    // アイコン側は文字を欲張るとアイコンの面が潰れるので控えめに
     const wMm = toMm(box.w);
-    const base = mode === 'text' ? wMm * 0.20 : wMm * 0.215;
-    el.style.setProperty('--name-size', `${Math.min(13, Math.max(7, base)).toFixed(2)}pt`);
+    const base = mode === 'text' ? wMm * 0.20 : wMm * 0.155;
+    el.style.setProperty('--name-size', `${Math.min(11.5, Math.max(7, base)).toFixed(2)}pt`);
 
     let html = items.map((s) => (mode === 'text' ? textHtml(s) : cardHtml(s))).join('');
     for (let i = items.length; i < box.cols * box.rows; i++) {
@@ -302,27 +318,31 @@
     el.innerHTML = html;
   }
 
+  /* 補足が空の項目でも枠だけ残す。同じ行のカードで名称の高さが
+     ずれると、等サイズのはずのカードがそろって見えなくなるため */
   function bodyHtml(s) {
-    const sub = (state.showSub && s.sub) ? `<span class="card__sub">${esc(s.sub)}</span>` : '';
+    const sub = state.showSub ? `<span class="card__sub">${esc(s.sub || '')}</span>` : '';
     return `<div class="card__body"><span class="card__name">${esc(s.name)}</span>${sub}</div>`;
   }
+  /* アイコンカード：上にアイコン、下に名称。アイコン未設定なら枠だけ出す */
   function cardHtml(s) {
     const long = s.name.length >= 11 ? ' card--long' : '';
-    if (!s.image) return `<div class="card card--noimg${long}">${bodyHtml(s)}</div>`;
-    return `<div class="card${long}" style="background-image:url('${s.image}')">`
-         + `<div class="card__scrim"></div>${bodyHtml(s)}</div>`;
+    const icon = s.icon
+      ? `<span class="card__icon" style="background-image:url('${s.icon}')"></span>`
+      : '<span class="card__icon card__icon--none"></span>';
+    return `<div class="card card--icon${long}">${icon}${bodyHtml(s)}</div>`;
   }
   const textHtml = (s) => `<div class="card card--text${s.name.length >= 11 ? ' card--long' : ''}">${bodyHtml(s)}</div>`;
 
   /* ---- レイアウト計算 -------------------------------------------
      カードは等サイズ・余白なしを前提に、
-       ・セル比が縦長（写真）/ 横長（文字）の目標に近い
+       ・セル比がほぼ正方（アイコン）/ 横長（文字）の目標に近い
        ・共通仕様カードの面積 ÷ 付加価値仕様カードの面積 ≒ ratio
        ・端数マス（フィラー）が少ない
      を満たす (左右配分, 列数, 行数) を全探索で選ぶ。
      --------------------------------------------------------------- */
   function planLayout({ nC, nP, availW, H, gap, ratio, textP }) {
-    const T_PHOTO = 0.78;   // 目標セル比 幅/高（縦長）
+    const T_ICON = 1.06;    // 目標セル比 幅/高（アイコン＋名称なので、ほぼ正方）
     const T_TEXT  = 4.2;    // 文字タイルは横長
     const cell = (W, n, r) => {
       const cols = Math.ceil(n / r);
@@ -341,7 +361,7 @@
     // 片側だけのとき
     if (!nC || !nP) {
       const n = nC || nP;
-      const target = (!nC && textP) ? T_TEXT : T_PHOTO;
+      const target = (!nC && textP) ? T_TEXT : T_ICON;
       let best = null;
       for (let r = 1; r <= n; r++) {
         const c = cell(availW, n, r);
@@ -358,11 +378,11 @@
       const Wc = availW * s, Wp = availW * (1 - s);
       for (let rC = 1; rC <= nC; rC++) {
         const C = cell(Wc, nC, rC);
-        const eC = fit(C, T_PHOTO, mm(20));
+        const eC = fit(C, T_ICON, mm(20));
         if (!isFinite(eC)) continue;
         for (let rP = 1; rP <= nP; rP++) {
           const P = cell(Wp, nP, rP);
-          const eP = fit(P, textP ? T_TEXT : T_PHOTO, textP ? mm(30) : mm(18));
+          const eP = fit(P, textP ? T_TEXT : T_ICON, textP ? mm(30) : mm(18));
           if (!isFinite(eP)) continue;
           const areaRatio = (C.w * C.h) / (P.w * P.h);
           const score = eC + eP
@@ -462,7 +482,7 @@
   document.querySelectorAll('[data-add]').forEach((b) => {
     b.onclick = () => {
       const group = b.dataset.add;
-      state[group].push({ id: `x-${group}-${++uid}`, name: '新しい仕様', sub: '', image: '', on: true });
+      state[group].push({ id: `x-${group}-${++uid}`, name: '新しい仕様', sub: '', icon: '', on: true });
       commit();
       const rows = document.querySelectorAll(`#list-${group} .row__name`);
       const last = rows[rows.length - 1];
