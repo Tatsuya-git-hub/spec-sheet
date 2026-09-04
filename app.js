@@ -43,11 +43,22 @@
 
   const presetById = (id) => (window.SPEC_MASTER.labelPresets || []).find((p) => p.id === id) || null;
 
-  /* マスタの項目構成の指紋。data.js の項目を足し引きしたら値が変わるので、
-     保存済みの入力より新しいマスタを優先できる（load() で使用） */
+  /* 文字列を短い値にまとめる（指紋用）。
+     アイコンは data URL だと数十万文字になるので、そのまま指紋に入れない */
+  function hash32(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  }
+
+  /* マスタの項目構成の指紋。data.js の項目を足し引きしたり、
+     アイコンを差し替えたら値が変わるので、保存済みの入力より
+     新しいマスタを優先できる（load() で使用）
+     ★アイコンも指紋に含める。含めないと、名称が同じままアイコンだけ
+       追加した場合に、保存済みの「アイコン無し」が残ってしまう */
   function masterSig() {
     const m = window.SPEC_MASTER;
-    const ids = (g) => m[g].map((s) => `${s.id}:${s.name}`).join(',');
+    const ids = (g) => m[g].map((s) => `${s.id}:${s.name}:${hash32(s.icon || '')}`).join(',');
     return `${ids('common')}|${ids('premium')}`;
   }
 
@@ -83,7 +94,19 @@
       if (!s || !Array.isArray(s.common) || !Array.isArray(s.premium)) return fromMaster();
       // data.js の項目構成が変わっていたら、保存済みの入力は捨てて新しいマスタを使う
       if (s.sig !== masterSig()) return fromMaster();
-      return Object.assign(fromMaster(), s);
+      const merged = Object.assign(fromMaster(), s);
+      /* 保険：保存側のアイコンが空なら、マスタの絵を使う
+         （指紋が一致していても、画面上で消した以外の理由で
+           空のままになっているケースを拾う） */
+      const m = window.SPEC_MASTER;
+      ['common', 'premium'].forEach((g) => {
+        const byId = {};
+        m[g].forEach((x) => { byId[x.id] = x.icon || ''; });
+        merged[g].forEach((it) => {
+          if (!it.icon && !it.iconOff && byId[it.id]) it.icon = byId[it.id];
+        });
+      });
+      return merged;
     } catch (e) { return fromMaster(); }
   }
   function save() {
@@ -173,7 +196,12 @@
       th.title = 'クリックでアイコンを選択 / Shift+クリックで削除';
       if (it.icon) th.style.backgroundImage = `url("${it.icon}")`;
       else th.textContent = '＋';
-      th.onclick = (ev) => { if (ev.shiftKey) { it.icon = ''; commit(); } else pickImage(it); };
+      /* 消したことを iconOff で覚える。覚えないと、次に開いたとき
+         マスタの絵で埋め戻されて消えない */
+      th.onclick = (ev) => {
+        if (ev.shiftKey) { it.icon = ''; it.iconOff = true; commit(); }
+        else pickImage(it);
+      };
 
       const nm = document.createElement('input');
       nm.className = 'row__name'; nm.type = 'text'; nm.value = it.name;

@@ -185,15 +185,15 @@ body{
   background:
     /* 右上の光源 */
     radial-gradient(46% 40% at 100% 0%,
-      rgba(var(--sheen), .34) 0%, rgba(var(--sheen), .13) 38%, transparent 74%),
+      rgba(var(--sheen), .24) 0%, rgba(var(--sheen), .09) 38%, transparent 74%),
     /* 斜めに落ちる光の帯 */
     linear-gradient(206deg,
-      transparent 0%, rgba(var(--sheen), .17) 12%, rgba(var(--sheen), .055) 26%,
+      transparent 0%, rgba(var(--sheen), .12) 12%, rgba(var(--sheen), .04) 26%,
       transparent 44%),
     /* 右下の床の照り返し */
-    radial-gradient(58% 34% at 84% 104%, rgba(var(--sheen), .10), transparent 70%),
+    radial-gradient(58% 34% at 84% 104%, rgba(var(--sheen), .07), transparent 70%),
     /* 中央に広がる青緑の空気 */
-    radial-gradient(92% 88% at 64% 54%, rgba(40, 104, 99, .62), transparent 76%),
+    radial-gradient(92% 88% at 64% 54%, rgba(18, 46, 45, .26), transparent 76%),
     /* 左上へ向かう闇 */
     radial-gradient(74% 78% at 0% 0%, rgba(0,0,0,.80), transparent 66%);
 }
