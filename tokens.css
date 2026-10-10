@@ -1,7 +1,7 @@
 /* =============================================================
    デザイントークン（色・余白・書体）
    ★デザイン確定時は原則このファイルだけを差し替えます
-   コンセプト: 黒基調 / 明朝の見出しで高級感 / 写真は面で見せる
+   コンセプト: 黒基調 / 書体はすべて游明朝 / カードはガラスの板
    ============================================================= */
 :root{
   /* ---- 紙面（出力）---- */
@@ -17,9 +17,6 @@
   --paper:     #070b0c;      /* 地 */
   --paper-2:   #101617;      /* 面（カード地・微妙な差） */
   --sheen:     224, 240, 238; /* 右上から差す光の色（rgb成分） */
-  /* アイコンを載せる台座。★アイコン画像の地の色と同じにする
-     （ずれると画像のまわりに四角い境目が出る。いまの素材は #faf7f4） */
-  --icon-plate: #faf7f4;
   --ink:       #ffffff;
   --ink-sub:   #9fb0ae;
   --line:      rgba(255,255,255,.16);
@@ -50,8 +47,12 @@
   --site-cta:  #2f7ce0;
 
   /* ---- 書体 ----
-     見出し=明朝（高級感） / 仕様名=ゴシック（視認性） */
-  --font-display: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Georgia", "Times New Roman", serif;
-  --font-ui: "Yu Gothic UI", "Yu Gothic", "Meiryo", "Hiragino Kaku Gothic ProN", sans-serif;
-  --font-name: "Yu Gothic", "Meiryo", "Hiragino Kaku Gothic ProN", sans-serif;
+     すべて游明朝に固定（和文も欧文も）。欧文用の書体は挟まない。
+     游明朝の入っていない端末（iPad / Mac）はヒラギノ明朝で表示される。
+     ★游明朝はライセンス上Webフォントとして埋め込めないため、端末の書体を使う
+     変数を3つに分けているのは、あとで用途ごとに変えられるようにするため */
+  --font-mincho: "Yu Mincho", "YuMincho", "游明朝", "Hiragino Mincho ProN", "Hiragino Mincho Pro", serif;
+  --font-display: var(--font-mincho);   /* 見出し・欧文ラベル */
+  --font-ui: var(--font-mincho);        /* 画面の操作部品・本文 */
+  --font-name: var(--font-mincho);      /* カードの仕様名 */
 }

@@ -36,7 +36,38 @@ body{
   font-family: var(--font-display);
   font-size: 19px; font-weight: normal; letter-spacing: .12em; margin: 0 0 4px;
 }
-.editor__sub{ margin: 0 0 18px; font-size: 11px; color: var(--ui-sub); }
+.editor__sub{ margin: 0 0 14px; font-size: 11px; color: var(--ui-sub); }
+
+/* ---- 作り方の切替（1軸 / 2軸）----------------------------------
+   スタートページの2つの入口と同じ2択。入力はモードごとに別に
+   保存されるので、行き来しても互いを壊さない */
+.modetabs{
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-bottom: 18px;
+}
+.modetabs__btn{
+  font: inherit; text-align: left; cursor: pointer;
+  padding: 7px 10px; border-radius: var(--radius-ui);
+  color: var(--ui-sub); background: transparent;
+  border: 1px solid var(--ui-line);
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.modetabs__btn b{
+  display: block; font-size: 12px; font-weight: bold; letter-spacing: .04em;
+}
+.modetabs__btn span{ display: block; font-size: 10px; line-height: 1.4; opacity: .8; }
+.modetabs__btn:hover{ border-color: var(--gold); color: var(--ui-text); }
+.modetabs__btn.is-active{
+  color: var(--gold); border-color: var(--gold);
+  background: rgba(201,171,109,.10);
+}
+
+/* ---- 作り方に応じた出し入れ ----
+   1軸のときは2軸だけの項目を、2軸のときは1軸だけの項目を隠す。
+   モードが決まる前（JS実行前）は data-mode が無いので両方出るが、
+   起動時にすぐ設定されるため実害はない */
+body[data-mode="single"] [data-dual-only]{ display: none !important; }
+body[data-mode="dual"]   [data-single-only]{ display: none !important; }
 
 .panel{
   border: 1px solid var(--ui-line); border-radius: var(--radius-ui);
@@ -56,6 +87,8 @@ body{
 .field{ display: block; margin-bottom: 8px; }
 .field > span{ display: block; font-size: 10.5px; color: var(--ui-sub); margin-bottom: 3px; }
 .field em{ font-style: normal; opacity: .75; }
+/* 2軸のときだけ付く「左 」「右 」の接頭。1軸では上のルールで消える */
+.field .lr{ font-style: normal; }
 .field input[type=text], .field textarea, .field select{
   width: 100%; padding: 6px 8px; font: inherit; font-size: 12px;
   color: var(--ui-text); background: #0b0b0e;
@@ -131,6 +164,12 @@ body{
   display: flex; align-items: center; gap: 16px; padding: 9px 18px;
   font-size: 11px; letter-spacing: .1em; color: var(--ui-sub);
   background: var(--ui-panel); border-bottom: 1px solid var(--ui-line);
+}
+/* 並べ替えの操作案内 */
+.stage__hint{
+  font-size: 10px; letter-spacing: .04em; color: var(--ui-sub);
+  padding: 1px 8px; border-radius: 999px;
+  border: 1px solid var(--ui-line);
 }
 /* 出力テーマの切替（サン / ムーン） */
 .themetoggle{
@@ -234,6 +273,16 @@ body{
 .sheet__lead:empty{ display: none; }
 .sheet__lead .em{ color: var(--accent-2); font-weight: bold; }
 
+/* ガラスの板と影（黒い紙面）。明るい紙面は [B-2] で上書き */
+.sheet{
+  --glass-top:    rgba(255,255,255,.085);
+  --glass-bottom: rgba(255,255,255,.020);
+  --glass-edge:   rgba(255,255,255,.10);
+  --glass-hi:     rgba(255,255,255,.14);     /* 上辺のハイライト */
+  --card-shadow:      0 1.2mm 3.2mm rgba(0,0,0,.45), 0 .3mm .8mm rgba(0,0,0,.30);
+  --card-shadow-soft: 0 .8mm 2.4mm rgba(0,0,0,.28);
+}
+
 /* 本文：2ブロック横並び（幅配分は JS が flex で指定） */
 .sheet__body{ flex: 1; min-height: 0; display: flex; gap: 6mm; }
 .block{ display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -287,37 +336,49 @@ body{
   display: grid; gap: var(--cell-gap);
 }
 
-/* アイコンカード：上にアイコン、下に名称（写真ではなく図としてそろえる） */
+/* ---- カード共通：ガラスの板 ----------------------------------
+   地は透明度の高い白の重ね（--glass-*）。紙面の光の階調が透けるので、
+   同じ色のタイルが並んでいるようには見えない。
+   上辺だけ明るい縁（inset の 1 本）で板の厚みを出し、
+   下にやわらかい影（--card-shadow）を落として紙面から少し浮かせる。
+
+   backdrop-filter（すりガラスのぼかし）は使わない。
+   背後が滑らかなグラデーションなのでぼかしても見た目はほぼ変わらず、
+   印刷（PDF）では画像化されて重く・粗くなることがあるため */
 .card{
   position: relative; min-width: 0; min-height: 0; overflow: hidden;
   border-radius: var(--card-radius);
-  background: var(--paper-2);
+  background: linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+  border: .25mm solid var(--glass-edge);
+  box-shadow: inset 0 .3mm 0 var(--glass-hi), var(--card-shadow);
 }
-/* カード地は半透明。紙面の光の階調がカードにも乗るので、
-   同じ色のタイルが並んでいるようには見えない */
+/* アイコンカード：上にアイコン、下に名称（写真ではなく図としてそろえる） */
 .card--icon{
   display: flex; flex-direction: column;
   padding: 2.2mm 2mm 2.4mm;
-  background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.018));
-  border: .25mm solid var(--line-soft);
 }
-/* アイコンの面（明るい台座）
-   アイコンは「クリーム地＋濃色の線」なので、黒い紙面に直接置くと
-   画像の地が白い四角として浮く。台座の色を画像の地と合わせて、
-   1枚の板の上に線画が載っているように見せる。
-   contain なので、正方形でない画像でも切れない */
+/* アイコンの面
+   アイコンは地を透過してあるので（make_icons.py）、台座は置かず
+   ガラスの板に線画を直接載せる。黒い紙面では線をアイボリーにした
+   別の絵（iconDark）に app.js が差し替える。
+   contain なので、正方形でない画像でも切れない。
+
+   --icon-scale は「面のどこまでを絵が占めるか」。
+   contain のまま縮めたいので、内側の余白を作って
+   background-origin: content-box で絵をその内側だけに収める。
+   transform: scale() だと面からはみ出して切れ、
+   background-size を % 指定にすると縦横比が崩れる */
 .card__icon{
   flex: 1; min-height: 0; margin-bottom: 1.8mm;
-  border-radius: var(--card-radius);
-  background-color: var(--icon-plate, #f7f4ed);
   background-position: center; background-size: contain; background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 .2mm rgba(0,0,0,.06);
+  background-origin: content-box;
+  padding: calc((1 - var(--icon-scale, 1)) * 50%);
 }
-/* アイコン未設定のときの当たり（あとで画像を入れる場所）。台座は出さない */
+/* アイコン未設定のときの当たり（あとで画像を入れる場所） */
 .card__icon--none{
   position: relative;
-  background: none; box-shadow: none;
   border: .25mm dashed var(--line-soft);
+  border-radius: var(--card-radius);
 }
 .card__icon--none::after{
   content: "ICON"; position: absolute; inset: 0;
@@ -339,23 +400,54 @@ body{
 }
 .card--long .card__name{ font-size: calc(var(--name-size, 9pt) * .84); }
 
-/* 文字タイル（付加価値仕様のアイコンOFF時） */
+/* ---- 文字タイル（付加価値仕様。既定はこちら）--------------------
+   アイコンを使わず、組版だけで見せる面。セルが横長なので中央寄せより
+   左寄せのほうが視線が流れ、一覧として読みやすい。
+   左端に金の短い縦線を置く（見出し下の金線と同じ motif でそろえる）。
+   光は左上から当てて、紙面の階調と向きを合わせる */
+/* 文字は下に寄せる。件数が少ないとセルが縦長になるが、上下中央だと
+   小さな文字が広い面の真ん中に浮いて「置き忘れ」に見える。
+   下に寄せておけば、上の空きが意図した余白として読める */
 .card--text{
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 2mm 3mm;
-  background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-  border: .25mm solid var(--line-soft);
-  border-left: .8mm solid var(--gold);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 2.4mm 3.4mm 2.6mm;
+  background: linear-gradient(100deg, var(--glass-top) 0%, var(--glass-bottom) 100%);
 }
-.card--text .card__body{ position: static; padding: 0; }
-.card--text .card__name{ text-shadow: none; }
-.card--text .card__sub{ color: var(--ink-sub); }
+.card--text .card__body{
+  position: relative; padding: 2.6mm 0 0; text-align: left;
+}
+/* 名称の上に金の短い罫。ブロック見出しの下に引いている線と同じ motif で、
+   アイコンが無くても「そこが仕様名の頭」だと分かるようにする */
+.card--text .card__body::before{
+  content: ""; position: absolute; left: 0; top: 0;
+  width: 5mm; height: .45mm; background: var(--gold);
+}
+.card--text .card__name{ text-shadow: none; letter-spacing: .04em; }
+.card--text .card__sub{
+  margin-top: 1mm; color: var(--ink-sub); letter-spacing: .06em;
+}
 
-/* 端数マスを埋めるタイル（カードを等サイズに保つため） */
+/* ---- 並べ替え（プレビュー上のドラッグ）------------------------
+   掴んでいるあいだは半透明にして、置き先が見えるようにする。
+   touch-action: none はタブレットで必須（指の動きを
+   ページのスクロールに取られると並べ替えができない）*/
+.card[data-id]{ cursor: grab; touch-action: none; }
+.card.is-dragging{
+  cursor: grabbing; opacity: .55;
+  outline: .4mm solid var(--gold); outline-offset: -.4mm;
+}
+body.is-reordering{ user-select: none; -webkit-user-select: none; }
+/* 印刷には操作の見た目を持ち込まない（保険）*/
+@media print{
+  .card.is-dragging{ opacity: 1; outline: 0; }
+}
+
+/* 端数マスを埋めるタイル（カードを等サイズに保つため）
+   同じガラスだが一段薄く、影も弱くして、仕様のカードより奥に引かせる */
 .card--filler{
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012));
-  border: .25mm solid var(--line-soft);
+  background: linear-gradient(180deg, var(--glass-bottom), transparent);
+  box-shadow: inset 0 .3mm 0 var(--glass-hi), var(--card-shadow-soft);
 }
 .card--filler span{
   font-family: var(--font-display);
@@ -393,6 +485,13 @@ body{
   --gold:      #121212;   /* 欧文・見出しの短いラインも黒に */
   --accent-2:  #000000;   /* リード文の強調 */
   --lead-fg:   #2b2b2b;
+  /* 明るい紙面のガラス：白をやや強く重ね、影は青みのグレーでうすく */
+  --glass-top:    rgba(255,255,255,.46);
+  --glass-bottom: rgba(255,255,255,.14);
+  --glass-edge:   rgba(255,255,255,.70);
+  --glass-hi:     rgba(255,255,255,.90);
+  --card-shadow:      0 1.2mm 3.4mm rgba(40,52,70,.16), 0 .3mm .8mm rgba(40,52,70,.10);
+  --card-shadow-soft: 0 .8mm 2.4mm rgba(40,52,70,.08);
 }
 /* 明るいテーマは階調のつけ方が逆（上が明るく、下に落ちる）。
    青緑の空気は入れず、白い光だけをうすく置く */
@@ -402,14 +501,10 @@ body{
     linear-gradient(206deg, transparent 0%, rgba(255,255,255,.30) 14%, transparent 42%),
     radial-gradient(80% 76% at 6% 104%, rgba(0,0,0,.10), transparent 68%);
 }
-/* アイコンカード：明るい面 + 濃い文字
-   ★アイコン画像そのものは色を反転できないので、
-     明るいテーマで使うなら濃い色のアイコンを入れてください */
+/* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
   --sub-fg: var(--ink-sub);
-  background: linear-gradient(180deg, rgba(255,255,255,.52), rgba(255,255,255,.14));
-  border-color: var(--line-soft);
 }
 .sheet[data-theme="light"] .card__icon--none::after{ color: rgba(0,0,0,.26); }
 
@@ -417,14 +512,6 @@ body{
 .sheet[data-theme="light"] .card--text{
   --name-fg: var(--ink);
   --sub-fg: var(--ink-sub);
-  background: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.18));
-  border-color: var(--line-soft);
-  border-left-color: #121212;
-}
-/* 端数マスのフィラー */
-.sheet[data-theme="light"] .card--filler{
-  background: linear-gradient(180deg, rgba(0,0,0,.045), rgba(0,0,0,.015));
-  border-color: var(--line-soft);
 }
 .sheet[data-theme="light"] .card--filler span{ color: rgba(0,0,0,.22); }
 
