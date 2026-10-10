@@ -218,9 +218,10 @@ body[data-mode="dual"]   [data-single-only]{ display: none !important; }
 /* 地の空気：右上から光が差し込み、左下へ落ちていく
    （黒一色だと重いので、深い青緑の階調をつける）
    ・グラデーションだけで作るので、印刷しても画像の劣化がない
-   ・中身は z-index:1 で必ずこの層より上に置く */
+   ・中身は z-index:2 で必ずこの層より上に置く。写真の帯（z-index:0）はこの層の下に
+     敷くので、光は写真の上にもかかり、帯の消え際に段差ができない */
 .sheet::before{
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
     /* 右上の光源 */
     radial-gradient(46% 40% at 100% 0%,
@@ -236,7 +237,7 @@ body[data-mode="dual"]   [data-single-only]{ display: none !important; }
     /* 左上へ向かう闇 */
     radial-gradient(74% 78% at 0% 0%, rgba(0,0,0,.80), transparent 66%);
 }
-.sheet > *{ position: relative; z-index: 1; }
+.sheet > *{ position: relative; z-index: 2; }
 
 /* ヘッダー：紙の端まで届く（フチなし） */
 .sheet__head{
@@ -462,82 +463,41 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   border: .25mm dashed var(--line); border-radius: var(--card-radius);
 }
 
-/* ---- 写真の列（.sheet--visual。「写真」がONのとき app.js が付ける）----
-   左の列に「タイトル → リード → 写真」を縦に積み、カードは右の列に寄せる。
-   写真は上・下・右に向かって紙の色に溶かし、左と下は紙の端まで届かせる（フチなし）。
+/* ---- 写真の帯（.sheet--visual。「写真」がONのとき app.js が付ける）----
+   紙面の上端に写真を横いっぱいに敷き、下に向かって紙の色に溶かす（フチなし）。
+   主役はあくまでカードなので、写真は上の帯だけにとどめ、
+   タイトルは溶けかけた部分に重ねて、帯のぶんだけ下がる量を小さくする。
 
    溶かし方は「紙の色のグラデーションを写真の上にかぶせる」。
    mask-image のほうが素直だが、Chromium は印刷（PDF）で mask を
    落とすことがあり、写真の四角い縁がそのまま出てしまうため使わない。
    かぶせる色は var(--paper) なので、黒い紙面でも白い紙面でもその地に溶ける。
 
-   .sheet__inner は display: contents にして、中のリード・本文・フッターを
-   直接この格子に並べる。HTML を2通り持たずに済ませるため。
    カードの寸法は app.js が #sheet-body の実寸から計算するので、
-   列が増えても計算側は何も変えなくてよい */
+   帯のぶん本文が縮んでも計算側は何も変えなくてよい */
 .sheet__visual{ display: none; }
-.sheet.sheet--visual{
-  --visual-w: 92mm;
-  display: grid;
-  grid-template-columns: var(--visual-w) minmax(0, 1fr);
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "head   body"
-    "lead   body"
-    "visual body"
-    "visual foot";
+.sheet{
+  --visual-h: 54mm;       /* 写真の帯の高さ（溶けて消えるところまで） */
+  --visual-under: 28mm;   /* タイトルの上端の位置（帯に重なる） */
 }
-.sheet--visual .sheet__inner{ display: contents; }
 .sheet--visual .sheet__visual{
-  display: block; grid-area: visual;
-  position: relative; z-index: 0;     /* 文字より下に敷く */
-  margin-top: 2mm;
-  background-size: cover; background-position: 50% 60%; background-repeat: no-repeat;
+  display: block;
+  position: absolute; z-index: 0;     /* 文字・カードより下に敷く */
+  top: 0; left: 0; right: 0; height: var(--visual-h);
+  background-size: cover; background-position: 50% 52%; background-repeat: no-repeat;
 }
-/* 紙の色を何%かぶせるか（途中の段をつけて、消え際をなだらかにする） */
 .sheet--visual .sheet__visual::after{
   --p: var(--paper);
   content: ""; position: absolute; inset: -1px;   /* 端数の1pxで縁が残らないように */
-  background:
-    /* 上：リードの下からふわっと入る */
-    linear-gradient(180deg, var(--p) 0%, transparent 22%),
-    /* 下：長い距離をかけて紙に消えていく */
-    linear-gradient(180deg, transparent 44%,
-      color-mix(in srgb, var(--p) 22%, transparent) 60%,
-      color-mix(in srgb, var(--p) 58%, transparent) 76%,
-      color-mix(in srgb, var(--p) 88%, transparent) 88%,
-      var(--p) 97%),
-    /* 右：カードとの境目をぼかす */
-    linear-gradient(90deg, transparent 56%,
-      color-mix(in srgb, var(--p) 45%, transparent) 80%,
-      var(--p) 100%);
+  /* 上は写真のまま、半分あたりから長い距離をかけて紙に消えていく */
+  background: linear-gradient(180deg, transparent 14%,
+    color-mix(in srgb, var(--p) 28%, transparent) 32%,
+    color-mix(in srgb, var(--p) 62%, transparent) 50%,
+    color-mix(in srgb, var(--p) 88%, transparent) 68%,
+    var(--p) 88%);
 }
-.sheet--visual .sheet__head{
-  grid-area: head;
-  flex-direction: column; align-items: flex-start; gap: 3.2mm;
-  padding: 10mm 6mm 0 var(--paper-pad-x);
-  border-bottom: 0;
-}
-.sheet--visual .sheet__en{ margin-bottom: 2.4mm; }
-.sheet--visual .sheet__title{
-  font-size: 27pt; line-height: 1.22; letter-spacing: .06em;
-}
-.sheet--visual .sheet__prop{
-  margin-left: 0; padding: 0; text-align: left; font-size: 9pt;
-}
-.sheet--visual .sheet__lead{
-  grid-area: lead;
-  margin: 0; padding: 5mm 7mm 0 var(--paper-pad-x);
-  font-size: 9.5pt; line-height: 1.85;
-}
-.sheet--visual .sheet__body{
-  grid-area: body;
-  padding: 8mm var(--paper-pad-x) var(--paper-pad-y) 0;
-}
-.sheet--visual .sheet__foot{
-  grid-area: foot;
-  margin: calc(var(--paper-pad-y) * -1 + 1.6mm) var(--paper-pad-x) 4mm 0;
-}
+/* 見出し下の罫は、写真が溶けていく途中を横に断ち切ってしまうので引かない */
+.sheet--visual .sheet__head{ padding-top: var(--visual-under); border-bottom: 0; }
 
 /* フッター */
 .sheet__foot{

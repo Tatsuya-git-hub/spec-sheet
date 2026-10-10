@@ -98,7 +98,7 @@
       commonEn: pr.cEn,  commonLabel: pr.c,  commonNote: pr.cn,
       premiumEn: pr.pEn, premiumLabel: pr.p, premiumNote: pr.pn,
       theme: 'light',      // 出力テーマ: 'light'（白地・既定）/ 'dark'（黒基調）
-      /* 紙面の左の列に置く写真。heroImg が空ならマスタの写真（meta.photo）。
+      /* 紙面の上の帯に置く写真。heroImg が空ならマスタの写真（meta.photo）。
          画面から選んだ写真だけを heroImg に持つ（マスタの写真は data.js にあるので保存しない） */
       heroOn: true,
       heroImg: '',
@@ -347,8 +347,8 @@
     const sheetEl = $('sheet');
     sheetEl.dataset.theme = state.theme;
 
-    /* --- 写真（左の列）---
-       列があるかどうかでカードの入る幅が変わるので、レイアウト計算より先に決める */
+    /* --- 写真（上の帯）---
+       帯があるかどうかでカードの入る高さが変わるので、レイアウト計算より先に決める */
     const hero = heroSrc();
     sheetEl.classList.toggle('sheet--visual', !!hero);
     $('sheet-visual').style.backgroundImage = hero ? `url('${hero}')` : '';
