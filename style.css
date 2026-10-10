@@ -464,9 +464,11 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 }
 
 /* ---- 写真の帯（.sheet--visual。「写真」がONのとき app.js が付ける）----
-   紙面の上端に写真を横いっぱいに敷き、下に向かって紙の色に溶かす（フチなし）。
-   主役はあくまでカードなので、写真は上の帯だけにとどめ、
-   タイトルは溶けかけた部分に重ねて、帯のぶんだけ下がる量を小さくする。
+   紙面の上端、見出し（仕様設備一覧）の右から右端までに写真を敷き、
+   左と下に向かって紙の色に溶かす（右と上は紙の端まで＝フチなし）。
+   主役はあくまでカードなので、写真は上の帯だけにとどめる。
+   見出しは写真に重ねない（白い地の上にあるほうが読める）。
+   写真の始まり --visual-left は app.js が見出しの右端を実測して入れる。
 
    溶かし方は「紙の色のグラデーションを写真の上にかぶせる」。
    mask-image のほうが素直だが、Chromium は印刷（PDF）で mask を
@@ -477,24 +479,33 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
    帯のぶん本文が縮んでも計算側は何も変えなくてよい */
 .sheet__visual{ display: none; }
 .sheet{
-  --visual-h: 54mm;       /* 写真の帯の高さ（溶けて消えるところまで） */
-  --visual-under: 28mm;   /* タイトルの上端の位置（帯に重なる） */
+  --visual-h: 50mm;       /* 写真の帯の高さ（溶けて消えるところまで） */
+  --visual-under: 16mm;   /* 見出しの上端の位置（帯の高さの中ほどに置く） */
+  --visual-left: 80mm;    /* 写真の始まり（app.js が実測で上書き） */
 }
 .sheet--visual .sheet__visual{
   display: block;
   position: absolute; z-index: 0;     /* 文字・カードより下に敷く */
-  top: 0; left: 0; right: 0; height: var(--visual-h);
+  top: 0; right: 0; height: var(--visual-h);
+  left: calc(var(--visual-left) + 4mm);
   background-size: cover; background-position: 50% 52%; background-repeat: no-repeat;
 }
 .sheet--visual .sheet__visual::after{
   --p: var(--paper);
   content: ""; position: absolute; inset: -1px;   /* 端数の1pxで縁が残らないように */
-  /* 上は写真のまま、半分あたりから長い距離をかけて紙に消えていく */
-  background: linear-gradient(180deg, transparent 14%,
-    color-mix(in srgb, var(--p) 28%, transparent) 32%,
-    color-mix(in srgb, var(--p) 62%, transparent) 50%,
-    color-mix(in srgb, var(--p) 88%, transparent) 68%,
-    var(--p) 88%);
+  background:
+    /* 左：見出しの側から、写真がだんだん浮かび上がる */
+    linear-gradient(90deg, var(--p) 0%,
+      color-mix(in srgb, var(--p) 86%, transparent) 9%,
+      color-mix(in srgb, var(--p) 55%, transparent) 20%,
+      color-mix(in srgb, var(--p) 22%, transparent) 32%,
+      transparent 44%),
+    /* 下：半分あたりから長い距離をかけて紙に消えていく */
+    linear-gradient(180deg, transparent 14%,
+      color-mix(in srgb, var(--p) 28%, transparent) 32%,
+      color-mix(in srgb, var(--p) 62%, transparent) 50%,
+      color-mix(in srgb, var(--p) 88%, transparent) 68%,
+      var(--p) 88%);
 }
 /* 見出し下の罫は、写真が溶けていく途中を横に断ち切ってしまうので引かない */
 .sheet--visual .sheet__head{ padding-top: var(--visual-under); border-bottom: 0; }

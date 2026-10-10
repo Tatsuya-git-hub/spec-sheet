@@ -347,7 +347,7 @@
     const sheetEl = $('sheet');
     sheetEl.dataset.theme = state.theme;
 
-    /* --- 写真（上の帯）---
+    /* --- 写真（上の帯・見出しの右）---
        帯があるかどうかでカードの入る高さが変わるので、レイアウト計算より先に決める */
     const hero = heroSrc();
     sheetEl.classList.toggle('sheet--visual', !!hero);
@@ -371,6 +371,15 @@
     // --- 文字まわり ---
     $('sheet-title').textContent   = state.title;
     $('sheet-titleen').textContent = state.titleEn;
+
+    /* 写真は見出しの右から始める。見出しの文言で長さが変わるので実測する
+       （プレビューは拡大縮小しているので、その倍率で割って紙面上の寸法に戻す） */
+    if (hero && sheetEl.offsetWidth) {
+      const sr = sheetEl.getBoundingClientRect();
+      const k  = sr.width / sheetEl.offsetWidth || 1;
+      const hr = $('sheet-title').parentElement.getBoundingClientRect();
+      sheetEl.style.setProperty('--visual-left', `${((hr.right - sr.left) / k).toFixed(1)}px`);
+    }
     $('sheet-prop').textContent    = state.prop;
     $('sheet-lead').innerHTML      = leadHtml(state.lead);
     $('en-common').textContent     = state.commonEn;
