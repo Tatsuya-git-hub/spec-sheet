@@ -204,7 +204,7 @@ body[data-mode="dual"]   [data-single-only]{ display: none !important; }
 .sheet-scaler{ transform-origin: top left; width: var(--paper-w); height: var(--paper-h); }
 
 /* =============================================================
-   [B] 紙面（A4 横 1枚・フチなし・黒基調）
+   [B] 紙面（A4 横 1枚・フチなし。ここは黒地の指定、白地は [B-2]）
    ============================================================= */
 .sheet{
   position: relative;
@@ -462,6 +462,83 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   border: .25mm dashed var(--line); border-radius: var(--card-radius);
 }
 
+/* ---- 写真の列（.sheet--visual。「写真」がONのとき app.js が付ける）----
+   左の列に「タイトル → リード → 写真」を縦に積み、カードは右の列に寄せる。
+   写真は上・下・右に向かって紙の色に溶かし、左と下は紙の端まで届かせる（フチなし）。
+
+   溶かし方は「紙の色のグラデーションを写真の上にかぶせる」。
+   mask-image のほうが素直だが、Chromium は印刷（PDF）で mask を
+   落とすことがあり、写真の四角い縁がそのまま出てしまうため使わない。
+   かぶせる色は var(--paper) なので、黒い紙面でも白い紙面でもその地に溶ける。
+
+   .sheet__inner は display: contents にして、中のリード・本文・フッターを
+   直接この格子に並べる。HTML を2通り持たずに済ませるため。
+   カードの寸法は app.js が #sheet-body の実寸から計算するので、
+   列が増えても計算側は何も変えなくてよい */
+.sheet__visual{ display: none; }
+.sheet.sheet--visual{
+  --visual-w: 92mm;
+  display: grid;
+  grid-template-columns: var(--visual-w) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "head   body"
+    "lead   body"
+    "visual body"
+    "visual foot";
+}
+.sheet--visual .sheet__inner{ display: contents; }
+.sheet--visual .sheet__visual{
+  display: block; grid-area: visual;
+  position: relative; z-index: 0;     /* 文字より下に敷く */
+  margin-top: 2mm;
+  background-size: cover; background-position: 50% 60%; background-repeat: no-repeat;
+}
+/* 紙の色を何%かぶせるか（途中の段をつけて、消え際をなだらかにする） */
+.sheet--visual .sheet__visual::after{
+  --p: var(--paper);
+  content: ""; position: absolute; inset: -1px;   /* 端数の1pxで縁が残らないように */
+  background:
+    /* 上：リードの下からふわっと入る */
+    linear-gradient(180deg, var(--p) 0%, transparent 22%),
+    /* 下：長い距離をかけて紙に消えていく */
+    linear-gradient(180deg, transparent 44%,
+      color-mix(in srgb, var(--p) 22%, transparent) 60%,
+      color-mix(in srgb, var(--p) 58%, transparent) 76%,
+      color-mix(in srgb, var(--p) 88%, transparent) 88%,
+      var(--p) 97%),
+    /* 右：カードとの境目をぼかす */
+    linear-gradient(90deg, transparent 56%,
+      color-mix(in srgb, var(--p) 45%, transparent) 80%,
+      var(--p) 100%);
+}
+.sheet--visual .sheet__head{
+  grid-area: head;
+  flex-direction: column; align-items: flex-start; gap: 3.2mm;
+  padding: 10mm 6mm 0 var(--paper-pad-x);
+  border-bottom: 0;
+}
+.sheet--visual .sheet__en{ margin-bottom: 2.4mm; }
+.sheet--visual .sheet__title{
+  font-size: 27pt; line-height: 1.22; letter-spacing: .06em;
+}
+.sheet--visual .sheet__prop{
+  margin-left: 0; padding: 0; text-align: left; font-size: 9pt;
+}
+.sheet--visual .sheet__lead{
+  grid-area: lead;
+  margin: 0; padding: 5mm 7mm 0 var(--paper-pad-x);
+  font-size: 9.5pt; line-height: 1.85;
+}
+.sheet--visual .sheet__body{
+  grid-area: body;
+  padding: 8mm var(--paper-pad-x) var(--paper-pad-y) 0;
+}
+.sheet--visual .sheet__foot{
+  grid-area: foot;
+  margin: calc(var(--paper-pad-y) * -1 + 1.6mm) var(--paper-pad-x) 4mm 0;
+}
+
 /* フッター */
 .sheet__foot{
   flex: 0 0 auto; margin-top: 3mm; padding-top: 1.8mm;
@@ -471,36 +548,32 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet__foot--hidden{ display: none; }
 
 /* =============================================================
-   [B-2] 明るい出力テーマ（.sheet[data-theme="light"]）
-   色味の方向: ライトグレーの地 × 完全モノクロ（金は使わない）
+   [B-2] 白い出力テーマ（.sheet[data-theme="light"]・既定）
+   色味の方向: 白い地 × 明朝 × 完全モノクロ（金は使わない）
+   写真の列を入れたとき、写真が白に溶けていくのが映えるよう地は真っ白。
    紙面の変数だけを上書きするので、構造・レイアウトは共通
    ============================================================= */
 .sheet[data-theme="light"]{
-  --paper:     #d5d5d4;   /* 地：ライトグレー */
-  --paper-2:   #e2e2e1;   /* 面：地よりわずかに明るく */
+  --paper:     #ffffff;   /* 地：白 */
+  --paper-2:   #f6f6f5;
   --ink:       #0e0e0e;
   --ink-sub:   #5a5a5a;
-  --line:      rgba(0,0,0,.30);
-  --line-soft: rgba(0,0,0,.14);
+  --line:      rgba(0,0,0,.22);
+  --line-soft: rgba(0,0,0,.10);
   --gold:      #121212;   /* 欧文・見出しの短いラインも黒に */
   --accent-2:  #000000;   /* リード文の強調 */
   --lead-fg:   #2b2b2b;
-  /* 明るい紙面のガラス：白をやや強く重ね、影は青みのグレーでうすく */
-  --glass-top:    rgba(255,255,255,.46);
-  --glass-bottom: rgba(255,255,255,.14);
-  --glass-edge:   rgba(255,255,255,.70);
-  --glass-hi:     rgba(255,255,255,.90);
-  --card-shadow:      0 1.2mm 3.4mm rgba(40,52,70,.16), 0 .3mm .8mm rgba(40,52,70,.10);
-  --card-shadow-soft: 0 .8mm 2.4mm rgba(40,52,70,.08);
+  /* 白い紙面のガラス：白地の上では白の重ねが見えないので、
+     下へわずかに灰色を引いて板の面を出し、縁と影で浮かせる */
+  --glass-top:    rgba(255,255,255,.92);
+  --glass-bottom: rgba(244,245,247,.92);
+  --glass-edge:   rgba(20,28,40,.07);
+  --glass-hi:     rgba(255,255,255,1);
+  --card-shadow:      0 1.4mm 4mm rgba(30,40,60,.10), 0 .3mm .8mm rgba(30,40,60,.07);
+  --card-shadow-soft: 0 .8mm 2.4mm rgba(30,40,60,.05);
 }
-/* 明るいテーマは階調のつけ方が逆（上が明るく、下に落ちる）。
-   青緑の空気は入れず、白い光だけをうすく置く */
-.sheet[data-theme="light"]::before{
-  background:
-    radial-gradient(52% 44% at 100% 0%, rgba(255,255,255,.55), transparent 72%),
-    linear-gradient(206deg, transparent 0%, rgba(255,255,255,.30) 14%, transparent 42%),
-    radial-gradient(80% 76% at 6% 104%, rgba(0,0,0,.10), transparent 68%);
-}
+/* 白い紙面は光の階調を入れない（真っ白のまま。写真がその白に溶ける） */
+.sheet[data-theme="light"]::before{ background: none; }
 /* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
@@ -577,6 +650,9 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 
 @media print{
   html, body{ height: auto; display: block; background: #fff; }
+  /* 紙面は2ページ目を防ぐため 0.4mm 短く刷るので、下端にその分だけ地が見える。
+     黒い紙面のときは地も黒にして、白い筋を出さない */
+  html:has(.sheet[data-theme="dark"]), html:has(.sheet[data-theme="dark"]) body{ background: #070b0c; }
   .editor, .stage__bar{ display: none !important; }
   /* 画面用の指定を紙面に持ち込まない（高さ制限が残ると途中で切れる） */
   .stage{

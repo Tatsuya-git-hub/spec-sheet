@@ -16,11 +16,21 @@
     <a class="editor__back" href="index.html">← スタート</a>
     <h1>仕様一覧シート</h1>
     <p class="editor__sub">選んだ仕様がA4横・フチなし1枚のPDFになります</p>
+
+    <!-- 作り方の切替。入力はモードごとに別々に保存されます -->
+    <div class="modetabs" role="group" aria-label="作り方">
+      <button type="button" class="modetabs__btn" data-mode="single">
+        <b>仕様一覧</b><span>1つのまとまりで並べる</span>
+      </button>
+      <button type="button" class="modetabs__btn" data-mode="dual">
+        <b>共通＋付加価値</b><span>2つに分けて並べる</span>
+      </button>
+    </div>
   </header>
 
-  <!-- 1. 見出し -->
+  <!-- 見出し -->
   <section class="panel">
-    <h2 class="panel__title">1. 見出し</h2>
+    <h2 class="panel__title">見出し</h2>
     <div class="grid2">
       <label class="field"><span>タイトル</span><input type="text" id="in-title"></label>
       <label class="field"><span>欧文<em>（小見出し）</em></span><input type="text" id="in-titleen"></label>
@@ -39,31 +49,65 @@
     </label>
   </section>
 
-  <!-- 2. 2軸の呼び方 -->
+  <!-- 写真（紙面の左の列。下に向かって紙の色に溶ける） -->
   <section class="panel">
-    <h2 class="panel__title">2. 2軸の呼び方</h2>
-    <p class="panel__hint">候補を切り替えて紙面で見比べられます。文字は直接編集も可。</p>
-    <label class="field">
+    <h2 class="panel__title">写真</h2>
+    <label class="check">
+      <input type="checkbox" id="in-hero">
+      <span>紙面の左に写真を入れる</span>
+    </label>
+    <div class="bulk">
+      <button type="button" id="btn-hero-pick">写真を選ぶ</button>
+      <button type="button" id="btn-hero-reset">既定の写真に戻す</button>
+    </div>
+    <p class="panel__hint">
+      建物のパースや外観写真（PNG / JPEG）。下に向かって紙の色に溶けるよう自動でぼかすので、写真の加工は不要です。
+    </p>
+  </section>
+
+  <!-- ブロックの呼び方 -->
+  <section class="panel">
+    <h2 class="panel__title">
+      <span data-dual-only>2軸の呼び方</span>
+      <span data-single-only>ブロックの見出し</span>
+    </h2>
+    <p class="panel__hint" data-dual-only>候補を切り替えて紙面で見比べられます。文字は直接編集も可。</p>
+    <label class="field" data-dual-only>
       <span>表現プリセット</span>
       <select id="in-preset"></select>
     </label>
+
+    <!-- 1軸のときは、この見出しは出さなくても紙面のタイトルで足りる -->
+    <label class="check" data-single-only>
+      <input type="checkbox" id="in-blockhead">
+      <span>カードの上に見出しを出す<em>（タイトルと重複するなら不要）</em></span>
+    </label>
+
     <div class="grid3">
-      <label class="field"><span>左 欧文</span><input type="text" id="in-cen"></label>
-      <label class="field"><span>左 見出し</span><input type="text" id="in-clabel"></label>
-      <label class="field"><span>左 補足</span><input type="text" id="in-cnote"></label>
+      <label class="field"><span><i class="lr" data-dual-only>左 </i>欧文</span><input type="text" id="in-cen"></label>
+      <label class="field"><span><i class="lr" data-dual-only>左 </i>見出し</span><input type="text" id="in-clabel"></label>
+      <label class="field"><span><i class="lr" data-dual-only>左 </i>補足</span><input type="text" id="in-cnote"></label>
+    </div>
+    <div class="grid3" data-dual-only>
       <label class="field"><span>右 欧文</span><input type="text" id="in-pen"></label>
       <label class="field"><span>右 見出し</span><input type="text" id="in-plabel"></label>
       <label class="field"><span>右 補足</span><input type="text" id="in-pnote"></label>
     </div>
   </section>
 
-  <!-- 3. 共通仕様 -->
+  <!-- 仕様（1軸）／ 共通仕様（2軸） -->
   <section class="panel">
     <h2 class="panel__title">
       <span id="head-common">共通仕様</span>
       <span class="counter" id="count-common"></span>
     </h2>
-    <p class="panel__hint">標準は全て掲載。載せない項目のチェックを外します。サムネイルを押すとアイコン画像を差し替えられます（Shift+クリックで削除）。</p>
+    <p class="panel__hint" data-single-only>
+      載せたい仕様にチェックを入れます。並び順は ↑↓ か、プレビュー上のカードを
+      ドラッグして入れ替えられます。
+    </p>
+    <p class="panel__hint" data-dual-only>
+      標準は全て掲載。載せない項目のチェックを外します。サムネイルを押すとアイコン画像を差し替えられます（Shift+クリックで削除）。
+    </p>
     <div class="bulk">
       <button type="button" data-bulk="common:all">全て載せる</button>
       <button type="button" data-bulk="common:none">全て外す</button>
@@ -72,8 +116,8 @@
     <button type="button" class="add" data-add="common">＋ 項目を追加</button>
   </section>
 
-  <!-- 4. 付加価値仕様 -->
-  <section class="panel">
+  <!-- 付加価値仕様（2軸のみ） -->
+  <section class="panel" data-dual-only>
     <h2 class="panel__title">
       <span id="head-premium">付加価値仕様</span>
       <span class="counter" id="count-premium"></span>
@@ -87,38 +131,71 @@
     <button type="button" class="add" data-add="premium">＋ 項目を追加</button>
   </section>
 
-  <!-- 5. レイアウト -->
+  <!-- レイアウト -->
   <section class="panel">
-    <h2 class="panel__title">5. レイアウト</h2>
-    <label class="field">
+    <h2 class="panel__title">レイアウト</h2>
+
+    <label class="field" data-dual-only>
       <span>共通仕様カードの大きさ<em>（付加価値仕様との比）</em></span>
       <span class="rangerow">
         <input type="range" id="in-ratio" min="100" max="160" step="2">
         <output id="ratio-val"></output>
       </span>
     </label>
-    <label class="check">
-      <input type="checkbox" id="in-premium-photo" checked>
-      <span>付加価値仕様もアイコンで並べる<em>（外すと文字タイル）</em></span>
+
+    <!-- 見え方の微調整。いずれも自動計算した寸法に対する倍率 -->
+    <label class="field">
+      <span>アイコンの大きさ</span>
+      <span class="rangerow">
+        <input type="range" id="in-zicon" min="55" max="100" step="1">
+        <output id="zicon-val"></output>
+      </span>
+    </label>
+    <label class="field">
+      <span>カードの間隔</span>
+      <span class="rangerow">
+        <input type="range" id="in-zgap" min="0" max="220" step="5">
+        <output id="zgap-val"></output>
+      </span>
+    </label>
+    <label class="field">
+      <span>文字の大きさ</span>
+      <span class="rangerow">
+        <input type="range" id="in-ztext" min="70" max="140" step="2">
+        <output id="ztext-val"></output>
+      </span>
+    </label>
+    <div class="bulk">
+      <button type="button" id="btn-zreset">大きさ・間隔を既定に戻す</button>
+    </div>
+
+    <!-- アイコンが未整備の項目を混ぜると点線枠が目立つので、逃げ道を用意 -->
+    <label class="check" data-single-only>
+      <input type="checkbox" id="in-textonly">
+      <span>アイコンを使わず文字だけで並べる</span>
+    </label>
+    <label class="check" data-dual-only>
+      <input type="checkbox" id="in-premium-photo">
+      <span>付加価値仕様もアイコンで並べる<em>（既定は文字タイル）</em></span>
     </label>
     <label class="check">
       <input type="checkbox" id="in-show-sub" checked>
       <span>カードに補足テキストを出す</span>
     </label>
     <p class="panel__hint">
-      カードは各ブロック内で同一サイズ。件数に応じて列数・行数と左右の面積配分を
+      カードは各ブロック内で同一サイズ。件数に応じて列数・行数<span data-dual-only>と左右の面積配分</span>を
       自動計算し、余白を残さず紙面を埋めます。
     </p>
     <p class="panel__hint" id="layout-info"></p>
   </section>
 
-  <!-- 6. 出力 -->
+  <!-- 出力 -->
   <section class="panel">
-    <h2 class="panel__title">6. 出力</h2>
+    <h2 class="panel__title">出力</h2>
     <button type="button" class="primary" id="btn-print">PDFで出力 / 印刷</button>
     <p class="panel__hint">
       印刷ダイアログで <b>用紙:A4 ／ 向き:横 ／ 余白:なし</b>、
-      <b>「背景のグラフィック」をON</b>（黒地のため必須）。
+      <b>「背景のグラフィック」をON</b>（写真・影を出すため必須）。
     </p>
     <div class="bulk">
       <button type="button" id="btn-reload">マスタから再読込</button>
@@ -131,6 +208,7 @@
 <main class="stage" id="stage">
   <div class="stage__bar">
     <span class="stage__label">PREVIEW ／ 出力紙面 A4横・フチなし・1枚</span>
+    <span class="stage__hint">カードをドラッグで並べ替え</span>
 
     <!-- 出力テーマの切替 -->
     <div class="themetoggle" role="group" aria-label="出力テーマ">
@@ -157,7 +235,9 @@
   <div class="stage__scroll">
     <div class="sheet-scaler" id="scaler">
       <!-- ▼ ここから下が印刷対象 ------------------------------- -->
-      <article class="sheet" id="sheet" data-theme="dark">
+      <article class="sheet" id="sheet" data-theme="light">
+        <!-- 写真（「写真」をONにしたときだけ左の列に出る） -->
+        <div class="sheet__visual" id="sheet-visual" aria-hidden="true"></div>
         <header class="sheet__head">
           <div class="sheet__headline">
             <span class="sheet__en" id="sheet-titleen"></span>
@@ -170,18 +250,18 @@
           <p class="sheet__lead" id="sheet-lead"></p>
 
           <div class="sheet__body" id="sheet-body">
-            <!-- 左ブロック（共通仕様） -->
+            <!-- 左ブロック（1軸のときは唯一のブロック） -->
             <section class="block" id="block-common">
-              <div class="block__head">
+              <div class="block__head" id="head-block-common">
                 <span class="block__en" id="en-common"></span>
                 <h3 class="block__title" id="label-common"></h3>
                 <span class="block__note" id="note-common"></span>
                 <span class="block__count" id="cnt-common"></span>
               </div>
-              <div class="fill" id="sheet-common"></div>
+              <div class="fill" id="sheet-common" data-group="common"></div>
             </section>
 
-            <!-- 右ブロック（付加価値仕様） -->
+            <!-- 右ブロック（付加価値仕様。1軸のときは非表示） -->
             <section class="block" id="block-premium">
               <div class="block__head">
                 <span class="block__en" id="en-premium"></span>
@@ -189,7 +269,7 @@
                 <span class="block__note" id="note-premium"></span>
                 <span class="block__count" id="cnt-premium"></span>
               </div>
-              <div class="fill" id="sheet-premium"></div>
+              <div class="fill" id="sheet-premium" data-group="premium"></div>
             </section>
           </div>
 
@@ -204,6 +284,7 @@
 </main>
 
 <input type="file" id="file-picker" accept="image/*" hidden>
+<input type="file" id="hero-picker" accept="image/*" hidden>
 
 <script src="data.js"></script>
 <script src="app.js"></script>

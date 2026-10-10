@@ -10,14 +10,7 @@
 </head>
 <body>
 
-<!-- 背景ビジュアル（写真を入れる場合は start.css の --hero-image を差し替え） -->
-<div class="bg" aria-hidden="true">
-  <div class="bg__image"></div>
-  <div class="bg__veil"></div>
-  <div class="bg__grain"></div>
-</div>
-
-<!-- ============ 浮遊するガラスナビ ============ -->
+<!-- ============ ナビ ============ -->
 <header class="nav" id="nav">
   <a class="nav__logo" href="index.html">
     <span class="nav__mark"></span>
@@ -28,8 +21,9 @@
     <div class="nav__item nav__item--menu">
       <button class="nav__link" type="button" aria-haspopup="true">使い方 <i class="chev"></i></button>
       <div class="nav__menu">
-        <a href="#flow"><b>3ステップの流れ</b><span>選ぶ → 確認 → 出力</span></a>
-        <a href="#feature"><b>できること</b><span>2軸・自動組版・写真表示</span></a>
+        <a href="#choose"><b>2つの作り方</b><span>仕様一覧 / 共通＋付加価値</span></a>
+        <a href="#flow"><b>3ステップの流れ</b><span>選ぶ → 並べる → 出力</span></a>
+        <a href="#feature"><b>できること</b><span>自動組版・並べ替え・出力テーマ</span></a>
         <a href="#output"><b>PDF出力の設定</b><span>A4横・フチなし1枚</span></a>
       </div>
     </div>
@@ -38,7 +32,7 @@
   </nav>
 
   <span class="nav__sep"></span>
-  <a class="nav__cta" href="builder.html">つくる</a>
+  <a class="nav__cta" href="#choose">つくる</a>
 </header>
 
 <!-- ============ ヒーロー ============ -->
@@ -46,26 +40,28 @@
   <div class="hero__text">
     <p class="hero__eyebrow">SPECIFICATION SHEET BUILDER</p>
     <h1 class="hero__title">
-      載せる仕様を<em>選ぶ</em>。
+      載せる仕様を<span class="nb"><em>選ぶ</em>。</span>
     </h1>
     <p class="hero__lead">
-      全戸に標準で備える仕様と、その物件で採用する付加価値仕様。
-      2つの軸をチェックするだけで、フチなしA4横1枚の仕様一覧シートができます。
+      載せたい仕様にチェックを入れて、並べ替えるだけ。
+      件数に合わせて自動で組み替わり、フチなしA4横1枚の仕様一覧シートができます。
     </p>
     <div class="hero__actions">
-      <a class="btn btn--primary" href="builder.html">仕様一覧をつくる</a>
+      <a class="btn btn--primary" href="#choose">つくりはじめる</a>
       <a class="btn btn--glass" href="#flow">使い方を見る</a>
     </div>
 
     <ul class="hero__meta">
-      <li><b>2</b><span>軸で構成</span></li>
+      <li><b>2</b><span>つの作り方</span></li>
       <li><b>1</b><span>枚に自動組版</span></li>
       <li><b>0</b><span>余白</span></li>
     </ul>
   </div>
 
-  <!-- 出力イメージ（ガラスの額に載せる） -->
+  <!-- 写真（下に向かって白に溶ける）＋ 出力イメージ
+       ★写真を差し替えるときは images/photo/building.jpg を置き換える -->
   <div class="hero__visual" id="hero-visual" aria-hidden="true">
+    <div class="hero__photo" style="--hero-photo: url('images/photo/building.jpg')"></div>
     <div class="frame">
       <div class="frame__bar">
         <span class="dot"></span><span class="dot"></span><span class="dot"></span>
@@ -95,6 +91,38 @@
   </div>
 </section>
 
+<!-- ============ 2つの入口 ============ -->
+<section class="section" id="choose">
+  <p class="section__en">CHOOSE</p>
+  <h2 class="section__title">作り方をえらぶ</h2>
+  <p class="section__lead">
+    どちらも操作は同じです。入力はそれぞれ別に保存されるので、行き来しても消えません。
+  </p>
+
+  <div class="paths">
+    <a class="glass path" href="builder.html?mode=single">
+      <span class="path__no">01</span>
+      <h3>仕様一覧を作成する</h3>
+      <p>分類を分けず、載せたい仕様をひとつのまとまりとして並べます。まずはこちらが手軽です。</p>
+      <div class="path__mock" aria-hidden="true">
+        <div><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <span class="path__go">この作り方でつくる</span>
+    </a>
+
+    <a class="glass path" href="builder.html?mode=dual">
+      <span class="path__no">02</span>
+      <h3>共通仕様＋付加価値仕様で作成する</h3>
+      <p>「全戸に標準で備える仕様」と「この物件で採用する仕様」を左右に分けて、差が伝わる構成にします。</p>
+      <div class="path__mock" aria-hidden="true">
+        <div><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div><i></i><i></i><i></i><i></i></div>
+      </div>
+      <span class="path__go">この作り方でつくる</span>
+    </a>
+  </div>
+</section>
+
 <!-- ============ 使い方 ============ -->
 <section class="section" id="flow">
   <p class="section__en">HOW IT WORKS</p>
@@ -104,13 +132,13 @@
   <ol class="steps">
     <li class="glass step">
       <span class="step__no">01</span>
-      <h3>共通仕様をととのえる</h3>
-      <p>標準の仕様は最初から全て掲載。この物件では載せないものだけ、チェックを外します。</p>
+      <h3>載せる仕様をえらぶ</h3>
+      <p>一覧のチェックを入れる・外すだけ。選んだものだけが紙面に並びます。項目の追加もその場でできます。</p>
     </li>
     <li class="glass step">
       <span class="step__no">02</span>
-      <h3>付加価値仕様を選ぶ</h3>
-      <p>採用する仕様にチェック。選んだものだけが紙面に並び、件数に応じて自動で組み替わります。</p>
+      <h3>並び順をととのえる</h3>
+      <p>プレビュー上のカードをそのままドラッグ。掴んだカードを置いた位置に入り、あとの並びがひとつずつずれます。</p>
     </li>
     <li class="glass step">
       <span class="step__no">03</span>
@@ -126,20 +154,20 @@
   <h2 class="section__title">できること</h2>
   <div class="cards">
     <article class="glass fcard">
-      <h3>2軸で伝える</h3>
-      <p>「全戸に標準で備える仕様」と「この物件だけの付加価値」を並べ、差が一目で伝わる構成。</p>
-    </article>
-    <article class="glass fcard">
       <h3>余白をつくらない</h3>
       <p>掲載件数が何件でも、列数・行数と左右の配分を自動計算。カードは等サイズのまま紙面を埋めます。</p>
     </article>
     <article class="glass fcard">
-      <h3>写真で見せる</h3>
-      <p>各仕様に写真を設定。名称はスクリムに重ね、視認性を保ったまま設備の質感を伝えます。</p>
+      <h3>ドラッグで並べ替え</h3>
+      <p>プレビュー上のカードを掴んで動かすだけ。置いた位置に入り、あとの並びがひとつずつずれます。</p>
     </article>
     <article class="glass fcard">
-      <h3>言葉を選べる</h3>
-      <p>「共通仕様／付加価値仕様」の呼び方は候補から切り替え、または自由入力。</p>
+      <h3>大きさを調整できる</h3>
+      <p>アイコンの大きさ・カードの間隔・文字の大きさをその場で微調整。自動で決めた寸法に倍率をかける方式なので、動かしても余白は出ません。</p>
+    </article>
+    <article class="glass fcard">
+      <h3>黒地と白地をえらべる</h3>
+      <p>高級感のある黒基調の紙面と、コピーしやすい明るい紙面。プレビュー右上のボタンで切り替えます。</p>
     </article>
   </div>
 </section>
@@ -156,7 +184,7 @@
       <li><span>背景のグラフィック</span><b>ON</b></li>
     </ul>
     <p class="output__note">
-      黒地の紙面のため「背景のグラフィック」は必須です。印刷ダイアログの送信先で
+      写真やカードの影を出すため「背景のグラフィック」は必須です。印刷ダイアログの送信先で
       「PDFに保存」を選べば、そのまま1枚のPDFになります。
     </p>
   </div>
@@ -165,7 +193,7 @@
 <!-- ============ 締め ============ -->
 <section class="closing">
   <h2>この物件の仕様一覧を、いまつくる。</h2>
-  <a class="btn btn--primary btn--lg" href="builder.html">仕様一覧をつくる</a>
+  <a class="btn btn--primary btn--lg" href="#choose">つくりはじめる</a>
 </section>
 
 <footer class="foot">

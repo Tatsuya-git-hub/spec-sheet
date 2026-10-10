@@ -87,7 +87,7 @@
       ? { common: [...m.common, ...m.premium].map((s) => item(s, false)), premium: [] }
       : { common: m.common.map((s) => item(s, true)), premium: m.premium.map((s) => item(s, false)) };
     return {
-      v: 4,
+      v: 5,
       sig: masterSig(),
       title: m.meta.title,
       titleEn: m.meta.titleEn || '',
@@ -97,7 +97,11 @@
       labelPreset: pr.id,
       commonEn: pr.cEn,  commonLabel: pr.c,  commonNote: pr.cn,
       premiumEn: pr.pEn, premiumLabel: pr.p, premiumNote: pr.pn,
-      theme: 'dark',       // 出力テーマ: 'dark'（黒基調）/ 'light'（明るめ）
+      theme: 'light',      // 出力テーマ: 'light'（白地・既定）/ 'dark'（黒基調）
+      /* 紙面の左の列に置く写真。heroImg が空ならマスタの写真（meta.photo）。
+         画面から選んだ写真だけを heroImg に持つ（マスタの写真は data.js にあるので保存しない） */
+      heroOn: true,
+      heroImg: '',
       /* 付加価値仕様は文字タイルで並べる（既定）。
          物件ごとに変わる項目なので専用のアイコンを用意しにくく、
          枠だけの「ICON」が並ぶより組版で見せたほうが締まる。
@@ -139,6 +143,9 @@
          変えたので、保存済みの設定にも一度だけ反映する
          （他の入力は残す。戻したい人はチェックを入れ直せる） */
       if ((s.v || 0) < 4) { merged.premiumPhoto = false; merged.v = 4; }
+      /* v4 までは黒地が既定で、写真の列はなかった。白地＋写真を既定に
+         したので一度だけ反映する（黒地に戻したい人はテーマを切り替えられる） */
+      if ((s.v || 0) < 5) { merged.theme = 'light'; merged.heroOn = true; merged.v = 5; }
       /* 保険：保存側のアイコンが空なら、マスタの絵を使う
          （指紋が一致していても、画面上で消した以外の理由で
            空のままになっているケースを拾う） */
@@ -178,7 +185,10 @@
   /* アイコン画像を data URL にする
      ・SVG はそのまま通す（拡大しても劣化しないので加工不要）
      ・それ以外は縮小して PNG。JPEGにすると背景の透明が黒く潰れるので使わない */
-  function toDataUrl(file, maxW = 512) {
+  /* type … 'image/png'（アイコン・既定）/ 'photo'（写真）。
+     写真は PNG のままだと重く、localStorage（5MB程度）を圧迫するので、
+     透過を残せる WebP にする（書き出せないブラウザは PNG のまま） */
+  function toDataUrl(file, maxW = 512, type = 'image/png') {
     return new Promise((resolve, reject) => {
       const fr = new FileReader();
       fr.onload = () => {
@@ -190,7 +200,7 @@
           c.width = Math.round(img.width * r);
           c.height = Math.round(img.height * r);
           c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-          resolve(c.toDataURL('image/png'));
+          resolve(type === 'photo' ? c.toDataURL('image/webp', 0.85) : c.toDataURL(type));
         };
         img.onerror = reject;
         img.src = fr.result;
@@ -220,6 +230,8 @@
     $('in-show-sub').checked      = !!state.showSub;
     $('in-blockhead').checked     = !!state.showBlockHead;
     $('in-textonly').checked      = !!state.textOnly;
+    $('in-hero').checked          = !!state.heroOn;
+    $('btn-hero-reset').disabled  = !state.heroImg;
     $('in-ratio').value   = state.ratio;
     $('ratio-val').value  = `×${(state.ratio / 100).toFixed(2)}`;
     ZOOMS.forEach(([id, key]) => {
@@ -315,6 +327,18 @@
     catch (err) { alert('画像を読み込めませんでした'); }
   });
 
+  /* ---------------- 写真の選択 ---------------- */
+  function heroSrc() {
+    if (!state.heroOn) return '';
+    return state.heroImg || window.SPEC_MASTER.meta.photo || '';
+  }
+  $('hero-picker').addEventListener('change', async (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    try { state.heroImg = await toDataUrl(f, 1600, 'photo'); state.heroOn = true; commit(); }
+    catch (err) { alert('画像を読み込めませんでした'); }
+  });
+
   /* =============================================================
      紙面
      ============================================================= */
@@ -322,6 +346,12 @@
     // --- 出力テーマ ---
     const sheetEl = $('sheet');
     sheetEl.dataset.theme = state.theme;
+
+    /* --- 写真（左の列）---
+       列があるかどうかでカードの入る幅が変わるので、レイアウト計算より先に決める */
+    const hero = heroSrc();
+    sheetEl.classList.toggle('sheet--visual', !!hero);
+    $('sheet-visual').style.backgroundImage = hero ? `url('${hero}')` : '';
 
     /* --- 見え方の微調整（倍率）---
        カード間隔は CSS 変数と planLayout の両方に渡す。片方だけだと
@@ -683,6 +713,9 @@
   $('in-show-sub').addEventListener('change',      (e) => { state.showSub      = e.target.checked; commit(); });
   $('in-blockhead').addEventListener('change',     (e) => { state.showBlockHead = e.target.checked; commit(); });
   $('in-textonly').addEventListener('change',      (e) => { state.textOnly      = e.target.checked; commit(); });
+  $('in-hero').addEventListener('change',          (e) => { state.heroOn        = e.target.checked; commit(); });
+  $('btn-hero-pick').addEventListener('click', () => { $('hero-picker').value = ''; $('hero-picker').click(); });
+  $('btn-hero-reset').addEventListener('click', () => { state.heroImg = ''; commit(); });
   $('in-ratio').addEventListener('input', (e) => {
     state.ratio = Number(e.target.value);
     $('ratio-val').value = `×${(state.ratio / 100).toFixed(2)}`;
