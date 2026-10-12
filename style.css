@@ -536,15 +536,29 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --lead-fg:   #2b2b2b;
   /* 白い紙面のガラス：白地の上では白の重ねが見えないので、
      下へわずかに灰色を引いて板の面を出し、縁と影で浮かせる */
-  --glass-top:    rgba(255,255,255,.92);
-  --glass-bottom: rgba(244,245,247,.92);
+  --glass-top:    rgba(255,255,255,.86);   /* 地のグラデがうっすら透ける程度 */
+  --glass-bottom: rgba(244,245,247,.80);
   --glass-edge:   rgba(20,28,40,.07);
   --glass-hi:     rgba(255,255,255,1);
   --card-shadow:      0 1.4mm 4mm rgba(30,40,60,.10), 0 .3mm .8mm rgba(30,40,60,.07);
   --card-shadow-soft: 0 .8mm 2.4mm rgba(30,40,60,.05);
 }
-/* 白い紙面は光の階調を入れない（真っ白のまま。写真がその白に溶ける） */
-.sheet[data-theme="light"]::before{ background: none; }
+/* 白い紙面の地（グラデーションだけで作るので PDF でも劣化しない）
+   ・四隅：グレーをかけ、隅へ向かって少しずつ沈める（写真の背景のような
+     ビネット）。白い面が額に入ったように締まる。中央は真っ白のまま
+   ・右下：深い青緑（ティール）をにじませ、上の写真と対角で紙面をはさむ
+   カードの板は半透明なので、色はカードの下にもうっすら透ける */
+.sheet[data-theme="light"]::before{
+  background:
+    /* 右下の青緑 */
+    radial-gradient(170mm 120mm at 100% 100%, rgba(38,104,130,.42), rgba(38,104,130,.16) 50%, transparent 100%),
+    radial-gradient(110mm 70mm at 84% 106%, rgba(18,66,90,.22), transparent 100%),
+    /* 四隅のグレー */
+    radial-gradient(95mm 70mm at 0 0,       rgba(88,90,96,.26), transparent 100%),
+    radial-gradient(95mm 70mm at 100% 0,    rgba(88,90,96,.30), transparent 100%),
+    radial-gradient(95mm 70mm at 0 100%,    rgba(88,90,96,.26), transparent 100%),
+    radial-gradient(95mm 70mm at 100% 100%, rgba(88,90,96,.16), transparent 100%);
+}
 /* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
