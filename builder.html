@@ -58,10 +58,15 @@
     </label>
     <div class="bulk">
       <button type="button" id="btn-hero-pick">写真を選ぶ</button>
+      <button type="button" id="btn-hero-paste">貼り付け</button>
       <button type="button" id="btn-hero-reset">既定の写真に戻す</button>
     </div>
+    <!-- スクリーンショットはここへ。Ctrl+V はこの画面のどこで押しても写真に入る -->
+    <div class="dropzone" id="hero-drop" tabindex="0">
+      スクショを <b>Ctrl+V</b> で貼り付け<br>または画像をここへドラッグ
+    </div>
     <p class="panel__hint">
-      建物のパースや外観写真（PNG / JPEG）。下に向かって紙の色に溶けるよう自動でぼかすので、写真の加工は不要です。
+      建物のパースや外観写真、スクリーンショット（PNG / JPEG）。下に向かって紙の色に溶けるよう自動でぼかすので、写真の加工は不要です。
     </p>
   </section>
 

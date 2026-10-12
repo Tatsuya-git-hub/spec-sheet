@@ -333,11 +333,44 @@
     if (!state.heroOn) return '';
     return state.heroImg || window.SPEC_MASTER.meta.photo || '';
   }
-  $('hero-picker').addEventListener('change', async (e) => {
-    const f = e.target.files && e.target.files[0];
-    if (!f) return;
-    try { state.heroImg = await toDataUrl(f, 1600, 'photo'); state.heroOn = true; commit(); }
+  async function setHero(file) {
+    if (!file || !/^image\//.test(file.type)) return false;
+    try { state.heroImg = await toDataUrl(file, 1600, 'photo'); state.heroOn = true; commit(); }
     catch (err) { alert('画像を読み込めませんでした'); }
+    return true;
+  }
+  $('hero-picker').addEventListener('change', (e) => setHero(e.target.files && e.target.files[0]));
+
+  /* スクリーンショットの貼り付け
+     ・Ctrl+V：画面のどこで押しても、クリップボードに画像があれば写真に入れる
+       （文字だけのときは何もしないので、入力欄への貼り付けはそのまま効く）
+     ・「貼り付け」ボタン：Clipboard API で読む。使えないブラウザでは Ctrl+V を案内
+     ・ドラッグ＆ドロップ：枠の上に落とす */
+  document.addEventListener('paste', (e) => {
+    const items = [...((e.clipboardData && e.clipboardData.items) || [])];
+    const it = items.find((x) => x.kind === 'file' && /^image\//.test(x.type));
+    if (!it) return;
+    e.preventDefault();
+    setHero(it.getAsFile());
+  });
+  $('btn-hero-paste').addEventListener('click', async () => {
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.read) throw new Error('unsupported');
+      for (const ci of await navigator.clipboard.read()) {
+        const type = ci.types.find((t) => t.startsWith('image/'));
+        if (type) { setHero(await ci.getType(type)); return; }
+      }
+      alert('クリップボードに画像がありません。スクショを撮ってからもう一度押してください');
+    } catch (err) {
+      alert('このブラウザではボタンから読めません。画面上で Ctrl+V（Mac は ⌘+V）を押してください');
+    }
+  });
+  const drop = $('hero-drop');
+  ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
+  ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, () => drop.classList.remove('is-over')));
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    setHero(e.dataTransfer.files && e.dataTransfer.files[0]);
   });
 
   /* =============================================================

@@ -116,6 +116,15 @@ body[data-mode="dual"]   [data-single-only]{ display: none !important; }
 }
 .bulk button:hover, .add:hover{ border-color: var(--gold); color: var(--gold); }
 .add{ width: 100%; margin-top: 8px; border-style: dashed; border-radius: 4px; padding: 6px; }
+/* 写真の貼り付け先（スクショの Ctrl+V / ドラッグ） */
+.dropzone{
+  margin-top: 8px; padding: 10px; border-radius: 4px; text-align: center;
+  font-size: 11px; line-height: 1.6; color: var(--ui-sub);
+  border: 1px dashed var(--ui-line); outline: none;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.dropzone b{ color: var(--ui-text); }
+.dropzone:focus, .dropzone.is-over{ border-color: var(--gold); color: var(--gold); background: rgba(201,171,109,.06); }
 
 .primary{
   width: 100%; font: inherit; font-size: 13px; font-weight: bold; letter-spacing: .08em;
@@ -536,29 +545,59 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --lead-fg:   #2b2b2b;
   /* 白い紙面のガラス：白地の上では白の重ねが見えないので、
      下へわずかに灰色を引いて板の面を出し、縁と影で浮かせる */
-  --glass-top:    rgba(255,255,255,.86);   /* 地のグラデがうっすら透ける程度 */
-  --glass-bottom: rgba(244,245,247,.80);
+  --glass-top:    rgba(255,255,255,.92);
+  --glass-bottom: rgba(244,245,247,.92);
   --glass-edge:   rgba(20,28,40,.07);
   --glass-hi:     rgba(255,255,255,1);
   --card-shadow:      0 1.4mm 4mm rgba(30,40,60,.10), 0 .3mm .8mm rgba(30,40,60,.07);
   --card-shadow-soft: 0 .8mm 2.4mm rgba(30,40,60,.05);
 }
-/* 白い紙面の地（グラデーションだけで作るので PDF でも劣化しない）
-   ・四隅：グレーをかけ、隅へ向かって少しずつ沈める（写真の背景のような
-     ビネット）。白い面が額に入ったように締まる。中央は真っ白のまま
-   ・右下：深い青緑（ティール）をにじませ、上の写真と対角で紙面をはさむ
-   カードの板は半透明なので、色はカードの下にもうっすら透ける */
+/* 白い紙面は「グレーの額 ＋ 内側の白いパネル」の二層
+   ・外周のグレーの帯（--frame-w）にだけグラデーションをかける。
+     四隅へ少しずつ沈むグレーと、右下にだけにじむ深い青緑（ティール）。
+   ・アイコンが並ぶ内側は真っ白のパネルで、グラデーションは乗せない
+     （帯とパネルの境目をはっきり見せる）。写真もこのパネルの中に収める。
+   層の順：::before（帯のグラデ）→ ::after（白いパネル）→ 写真 → 中身
+   グラデーションだけで作るので PDF でも劣化しない */
+.sheet[data-theme="light"]{
+  --frame-w: 6mm;          /* グレーの帯の幅 */
+  --panel-r: 2.6mm;        /* 白いパネルの角の丸み */
+  --paper-pad-x: 13mm;     /* 中身はパネルの内側から 7mm */
+  --paper-pad-y: 6mm;
+  background: #e4e5e8;
+}
 .sheet[data-theme="light"]::before{
+  z-index: 0;
   background:
     /* 右下の青緑 */
-    radial-gradient(170mm 120mm at 100% 100%, rgba(38,104,130,.42), rgba(38,104,130,.16) 50%, transparent 100%),
-    radial-gradient(110mm 70mm at 84% 106%, rgba(18,66,90,.22), transparent 100%),
+    radial-gradient(150mm 110mm at 100% 100%, rgba(38,104,130,.55), rgba(38,104,130,.20) 50%, transparent 100%),
+    radial-gradient(100mm 60mm at 84% 104%, rgba(18,66,90,.30), transparent 100%),
     /* 四隅のグレー */
-    radial-gradient(95mm 70mm at 0 0,       rgba(88,90,96,.26), transparent 100%),
-    radial-gradient(95mm 70mm at 100% 0,    rgba(88,90,96,.30), transparent 100%),
-    radial-gradient(95mm 70mm at 0 100%,    rgba(88,90,96,.26), transparent 100%),
-    radial-gradient(95mm 70mm at 100% 100%, rgba(88,90,96,.16), transparent 100%);
+    radial-gradient(110mm 80mm at 0 0,       rgba(80,82,90,.30), transparent 100%),
+    radial-gradient(110mm 80mm at 100% 0,    rgba(80,82,90,.34), transparent 100%),
+    radial-gradient(110mm 80mm at 0 100%,    rgba(80,82,90,.30), transparent 100%),
+    radial-gradient(110mm 80mm at 100% 100%, rgba(80,82,90,.18), transparent 100%);
 }
+.sheet[data-theme="light"]::after{
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  inset: var(--frame-w);
+  background: var(--paper);
+  border-radius: var(--panel-r);
+  box-shadow: 0 .6mm 2.4mm rgba(20,30,45,.10);
+}
+/* 写真はパネルの右上の角に合わせて置く（パネルの外＝帯にははみ出さない） */
+.sheet[data-theme="light"].sheet--visual .sheet__visual{
+  z-index: 1;
+  top: var(--frame-w); right: var(--frame-w);
+  border-top-right-radius: var(--panel-r);
+}
+/* ぼかしの層も同じ角で丸める。overflow:hidden で切り抜くと、
+   印刷で写真の縁が1本の細い線になって残るので使わない */
+.sheet[data-theme="light"].sheet--visual .sheet__visual::after{ border-top-right-radius: var(--panel-r); }
+/* 見出し・本文もパネルの内側から測る */
+.sheet[data-theme="light"] .sheet__head{ padding-top: calc(var(--frame-w) + 5.5mm); }
+.sheet[data-theme="light"].sheet--visual .sheet__head{ padding-top: calc(var(--frame-w) + 11mm); }
+.sheet[data-theme="light"] .sheet__inner{ padding-bottom: calc(var(--frame-w) + 5mm); }
 /* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
@@ -638,6 +677,8 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   /* 紙面は2ページ目を防ぐため 0.4mm 短く刷るので、下端にその分だけ地が見える。
      黒い紙面のときは地も黒にして、白い筋を出さない */
   html:has(.sheet[data-theme="dark"]), html:has(.sheet[data-theme="dark"]) body{ background: #070b0c; }
+  /* 紙面は用紙より 0.4mm ほど短く刷られるので、余りをグレーの帯の色でうめる */
+  html:has(.sheet[data-theme="light"]), html:has(.sheet[data-theme="light"]) body{ background: #d9dadd; }
   .editor, .stage__bar{ display: none !important; }
   /* 画面用の指定を紙面に持ち込まない（高さ制限が残ると途中で切れる） */
   .stage{
