@@ -545,7 +545,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --lead-fg:   #2b2b2b;
   /* 白い紙面のガラス：白地の上では白の重ねが見えないので、
      下へわずかに灰色を引いて板の面を出し、縁と影で浮かせる */
-  --glass-top:    rgba(255,255,255,.88);   /* 右下のネイビーがうっすら透ける程度 */
+  --glass-top:    rgba(255,255,255,.88);   /* 右下の青緑がうっすら透ける程度 */
   --glass-bottom: rgba(244,245,247,.82);
   --glass-edge:   rgba(20,28,40,.07);
   --glass-hi:     rgba(255,255,255,1);
@@ -556,7 +556,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
    ・外周のグレーの帯（--frame-w）に、四隅へ少しずつ沈むグレーをかける。
    ・アイコンが並ぶ内側は白いパネル（帯とパネルの境目をはっきり見せる）。
      写真もこのパネルの中に収める。
-   ・右下の濃いネイビーだけは帯とパネルの区切りを越えて、パネルの中までにじむ。
+   ・右下の深い青緑（ティール）はパネルの中だけに置く（グレーの額にはかけない）。
    層の順：::before（帯のグラデ）→ ::after（白いパネル）→ 写真 → 中身
    グラデーションだけで作るので PDF でも劣化しない */
 .sheet[data-theme="light"]{
@@ -569,9 +569,6 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet[data-theme="light"]::before{
   z-index: 0;
   background:
-    /* 右下の濃いネイビー */
-    radial-gradient(150mm 110mm at 100% 100%, rgba(16,32,66,.72), rgba(16,32,66,.28) 50%, transparent 100%),
-    radial-gradient(100mm 60mm at 84% 104%, rgba(10,22,50,.40), transparent 100%),
     /* 四隅のグレー */
     radial-gradient(110mm 80mm at 0 0,       rgba(80,82,90,.30), transparent 100%),
     radial-gradient(110mm 80mm at 100% 0,    rgba(80,82,90,.34), transparent 100%),
@@ -581,11 +578,11 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet[data-theme="light"]::after{
   content: ""; position: absolute; z-index: 0; pointer-events: none;
   inset: var(--frame-w);
-  /* 右下のネイビーだけは額の区切りを越えて、パネルの中までにじませる
-     （中心は額と同じ紙の右下角。パネル側は薄めにして、アイコンの読みやすさを保つ） */
+  /* 右下の深い青緑（ティール）。グレーの額とは切り離し、パネルの右下角を中心にする */
   background:
-    radial-gradient(210mm 150mm at calc(100% + var(--frame-w)) calc(100% + var(--frame-w)),
-      rgba(16,32,66,.55), rgba(16,32,66,.22) 40%, rgba(16,32,66,.06) 72%, transparent 100%),
+    radial-gradient(190mm 135mm at 100% 100%,
+      rgba(12,92,98,.58), rgba(12,92,98,.24) 40%, rgba(12,92,98,.06) 72%, transparent 100%),
+    radial-gradient(90mm 60mm at 100% 100%, rgba(10,60,66,.22), transparent 100%),
     var(--paper);
   border-radius: var(--panel-r);
   box-shadow: 0 .6mm 2.4mm rgba(20,30,45,.10);
