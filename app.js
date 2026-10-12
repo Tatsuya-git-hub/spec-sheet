@@ -12,7 +12,7 @@
 
    レイアウト方針（planLayout）
      ・カードは各ブロック内で常に等サイズ（均等グリッド）
-     ・端数のマスはフィラータイルで埋め、紙面に余白を残さない
+     ・端数のマスは空き（CSS で非表示）。端数がなるべく出ない列×行を選ぶ
      ・左右の面積配分と列数・行数を毎回自動計算し、
        共通仕様のカードが付加価値仕様より気持ち大きくなる解を選ぶ
    ============================================================= */
@@ -95,7 +95,7 @@
       ? { common: [...m.common, ...m.premium].sort((a, b) => gIdx(a) - gIdx(b)).map((s) => item(s, false)), premium: [] }
       : { common: m.common.map((s) => item(s, true)), premium: m.premium.map((s) => item(s, false)) };
     return {
-      v: 6,
+      v: 7,
       sig: masterSig(),
       title: m.meta.title,
       titleEn: m.meta.titleEn || '',
@@ -114,7 +114,7 @@
          以前はアイコンが未整備だったので文字タイルを既定にしていたが、
          全項目そろったのでアイコンに戻した。チェックを外せば文字タイル */
       premiumPhoto: true,
-      showSub: true,       // カードの補足テキスト
+      showSub: false,      // カードの補足テキスト（既定は出さない。名前だけのほうがすっきり読める）
       ratio: 118,          // 共通仕様カードの面積 ÷ 付加価値仕様カードの面積（%）
       /* 1軸のときの、カード上のブロック見出し。
          紙面のタイトルと内容が重なりやすいので既定は出さない */
@@ -129,7 +129,7 @@
            zIcon … アイコン画像が台座のどこまでを占めるか（100で台座に接する）
            zGap  … カードの間隔（--cell-gap への倍率。0で隙間なし）
            zText … 仕様名・補足の文字サイズ */
-      zIcon: 100,
+      zIcon: 88,           // 既定は 88%（面いっぱいより少し引いたほうが板の余白がきれい）
       zGap: 100,
       zText: 100,
       common: groups.common,
@@ -155,6 +155,8 @@
       if ((s.v || 0) < 5) { merged.theme = 'light'; merged.heroOn = true; merged.v = 5; }
       /* v5 までは付加価値仕様が文字タイル既定。アイコンがそろったので一度だけアイコンに */
       if ((s.v || 0) < 6) { merged.premiumPhoto = true; merged.v = 6; }
+      /* v6 までは補足テキストが既定で表示・アイコン100%。既定を非表示・88% にしたので一度だけ反映する */
+      if ((s.v || 0) < 7) { merged.showSub = false; merged.zIcon = 88; merged.v = 7; }
       /* 保険：保存側のアイコンが空なら、マスタの絵を使う
          （指紋が一致していても、画面上で消した以外の理由で
            空のままになっているケースを拾う） */
@@ -964,7 +966,8 @@
     });
   });
   $('btn-zreset').onclick = () => {
-    ZOOMS.forEach(([, key]) => { state[key] = 100; });
+    const def = fromMaster();   // 既定値はマスタから作った初期状態と同じにする
+    ZOOMS.forEach(([, key]) => { state[key] = def[key]; });
     commit();
   };
 

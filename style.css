@@ -483,15 +483,10 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 
 /* 端数マスを埋めるタイル（カードを等サイズに保つため）
    同じガラスだが一段薄く、影も弱くして、仕様のカードより奥に引かせる */
-.card--filler{
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, var(--glass-bottom), transparent);
-  box-shadow: inset 0 .3mm 0 var(--glass-hi), var(--card-shadow-soft);
-}
-.card--filler span{
-  font-family: var(--font-display);
-  font-size: 6.5pt; letter-spacing: .38em; color: rgba(255,255,255,.18);
-}
+/* 端数のマス：板も欧文ラベルも出さず、何もない空きにする（1軸・2軸・両テーマ共通）。
+   マス自体は残すので、カードの大きさと並びは変わらない。
+   visibility:hidden なら寸法は残るので、ドラッグ中に末尾へ送る当たり判定もそのまま効く */
+.card--filler{ visibility: hidden; }
 
 /* 空状態 */
 .empty{
@@ -658,7 +653,6 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --name-fg: var(--ink);
   --sub-fg: var(--ink-sub);
 }
-.sheet[data-theme="light"] .card--filler span{ color: rgba(0,0,0,.22); }
 
 /* =============================================================
    [B-3] 小さい画面（タブレット・スマホ）
