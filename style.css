@@ -629,6 +629,23 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet[data-theme="light"] .sheet__head{ padding-top: calc(var(--frame-w) + 5.5mm); }
 .sheet[data-theme="light"].sheet--visual .sheet__head{ padding-top: calc(var(--frame-w) + 11mm); }
 .sheet[data-theme="light"] .sheet__inner{ padding-bottom: calc(var(--frame-w) + 5mm); }
+/* 白い紙面のカード：すりガラスの板
+   ・地：半透明の白に、下へ向かってごく薄い青灰を重ねる（右下のネイビーや写真が透ける）
+   ・光：左上から斜めに差す艶（ガラスの面の映り込み）
+   ・縁：上と左は白く光らせ、下はわずかに沈める（板の厚み）＋外側に極細の輪郭
+   backdrop-filter は使わない（PDFで画像化されて粗くなるため）。グラデーションだけで作る */
+.sheet[data-theme="light"] .card:not(.card--filler){
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 22%, rgba(255,255,255,0) 46%),
+    linear-gradient(180deg, rgba(255,255,255,.62) 0%, rgba(236,240,246,.50) 100%);
+  border: .25mm solid rgba(255,255,255,.95);
+  box-shadow:
+    inset 0 .35mm 0 #fff,
+    inset .3mm 0 0 rgba(255,255,255,.85),
+    inset 0 -.35mm 0 rgba(20,30,50,.07),
+    0 0 0 .18mm rgba(20,30,50,.07),
+    var(--card-shadow);
+}
 /* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
   --name-fg: var(--ink);
