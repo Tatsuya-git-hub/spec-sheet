@@ -356,8 +356,8 @@
     const th = document.createElement('span');
     th.className = 'row__thumb';
     th.title = 'クリックでアイコンを選択 / Shift+クリックで削除';
-    // 操作パネルは黒地なので、サムネイルは黒い紙面用の絵を出す
-    if (it.icon) th.style.backgroundImage = `url("${iconFor(it, 'dark')}")`;
+    // 操作パネルは白地なので、サムネイルは明るい紙面用の絵（紺の線）を出す
+    if (it.icon) th.style.backgroundImage = `url("${iconFor(it, 'light')}")`;
     else th.textContent = '＋';
     /* 消したことを iconOff で覚える。覚えないと、次に開いたとき
        マスタの絵で埋め戻されて消えない */
