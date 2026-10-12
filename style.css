@@ -580,9 +580,9 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   inset: var(--frame-w);
   /* 右下の深い青緑（ティール）。グレーの額とは切り離し、パネルの右下角を中心にする */
   background:
-    radial-gradient(190mm 135mm at 100% 100%,
-      rgba(12,92,98,.58), rgba(12,92,98,.24) 40%, rgba(12,92,98,.06) 72%, transparent 100%),
-    radial-gradient(90mm 60mm at 100% 100%, rgba(10,60,66,.22), transparent 100%),
+    radial-gradient(130mm 92mm at 100% 100%,
+      rgba(12,92,98,.80), rgba(12,92,98,.36) 40%, rgba(12,92,98,.08) 72%, transparent 100%),
+    radial-gradient(60mm 42mm at 100% 100%, rgba(8,58,64,.35), transparent 100%),
     var(--paper);
   border-radius: var(--panel-r);
   box-shadow: 0 .6mm 2.4mm rgba(20,30,45,.10);
