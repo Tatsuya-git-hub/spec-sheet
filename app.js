@@ -87,7 +87,7 @@
       ? { common: [...m.common, ...m.premium].map((s) => item(s, false)), premium: [] }
       : { common: m.common.map((s) => item(s, true)), premium: m.premium.map((s) => item(s, false)) };
     return {
-      v: 5,
+      v: 6,
       sig: masterSig(),
       title: m.meta.title,
       titleEn: m.meta.titleEn || '',
@@ -102,11 +102,10 @@
          画面から選んだ写真だけを heroImg に持つ（マスタの写真は data.js にあるので保存しない） */
       heroOn: true,
       heroImg: '',
-      /* 付加価値仕様は文字タイルで並べる（既定）。
-         物件ごとに変わる項目なので専用のアイコンを用意しにくく、
-         枠だけの「ICON」が並ぶより組版で見せたほうが締まる。
-         アイコンを入れたくなったらチェックを入れれば絵の面に戻る */
-      premiumPhoto: false,
+      /* 付加価値仕様もアイコンで並べる（既定）。
+         以前はアイコンが未整備だったので文字タイルを既定にしていたが、
+         全項目そろったのでアイコンに戻した。チェックを外せば文字タイル */
+      premiumPhoto: true,
       showSub: true,       // カードの補足テキスト
       ratio: 118,          // 共通仕様カードの面積 ÷ 付加価値仕様カードの面積（%）
       /* 1軸のときの、カード上のブロック見出し。
@@ -146,6 +145,8 @@
       /* v4 までは黒地が既定で、写真の列はなかった。白地＋写真を既定に
          したので一度だけ反映する（黒地に戻したい人はテーマを切り替えられる） */
       if ((s.v || 0) < 5) { merged.theme = 'light'; merged.heroOn = true; merged.v = 5; }
+      /* v5 までは付加価値仕様が文字タイル既定。アイコンがそろったので一度だけアイコンに */
+      if ((s.v || 0) < 6) { merged.premiumPhoto = true; merged.v = 6; }
       /* 保険：保存側のアイコンが空なら、マスタの絵を使う
          （指紋が一致していても、画面上で消した以外の理由で
            空のままになっているケースを拾う） */
@@ -453,6 +454,12 @@
     $('layout-info').textContent = parts.join('／');
   }
 
+  /* 仕様名の幅（em）の見積もり。全角=1・半角=0.6、字間 .06em ぶんを足す */
+  const PT_MM = 0.3528;
+  function nameEm(s) {
+    return [...(s.name || '')].reduce((a, ch) => a + (ch.charCodeAt(0) < 0x2000 ? 0.6 : 1) + 0.06, 0);
+  }
+
   /* ---- グリッドを描く ----
      第4引数は「カードの種類」。グローバルの mode（作り方）とは別物なので
      名前を分けている */
@@ -469,7 +476,10 @@
          中央に小さく文字が浮いて、余白が抜けて見える） */
       pt = Math.min(14, Math.max(8, Math.min(wMm * 0.215, hMm * 0.46)));
     } else {
-      pt = Math.min(11.5, Math.max(7, wMm * 0.155));
+      /* アイコンに文字は入れないので、仕様名はここで読ませる。
+         カード幅に対して大きめに取る。1行に収まらない長い名前だけは
+         描いたあとにそのカードだけ縮める（下の fitNames） */
+      pt = Math.min(14, Math.max(8.5, Math.min(wMm * 0.24, hMm * 0.24)));
     }
     // 倍率は上限・下限を当てたあとに掛ける（先に掛けると上限で潰れて効かない）
     el.style.setProperty('--name-size', `${(pt * state.zText / 100).toFixed(2)}pt`);
@@ -479,6 +489,20 @@
       html += `<div class="card card--filler"><span>${esc(enLabel || '')}</span></div>`;
     }
     el.innerHTML = html;
+    if (kind !== 'text') fitNames(el, items, wMm, pt * state.zText / 100);
+  }
+
+  /* 長い名前は、そのカードだけ1行に収まる大きさまで縮める。
+     2行に割れると、等サイズのカードで名前の位置がそろわなくなる。
+     ほかのカードは大きいままにしたいので、ブロック全体は縮めない */
+  function fitNames(el, items, wMm, pt) {
+    items.forEach((s, i) => {
+      const name = el.children[i] && el.children[i].querySelector('.card__name');
+      if (!name) return;
+      const own = pt * (s.name.length >= 11 ? 0.84 : 1);   // .card--long の縮みと同じ
+      const fit = (wMm - 4.6) / nameEm(s) / PT_MM;
+      if (fit < own) name.style.fontSize = `${Math.max(5.5, fit).toFixed(2)}pt`;
+    });
   }
 
   /* 補足が空の項目でも枠だけ残す。同じ行のカードで名称の高さが

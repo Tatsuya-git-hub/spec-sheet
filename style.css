@@ -390,8 +390,8 @@ body[data-mode="dual"]   [data-single-only]{ display: none !important; }
 .card__body{ flex: 0 0 auto; text-align: center; }
 .card__name{
   display: block;
-  font-family: var(--font-name); font-weight: bold;
-  font-size: var(--name-size, 9pt); line-height: 1.25; letter-spacing: .02em;
+  font-family: var(--font-name); font-weight: 600;
+  font-size: var(--name-size, 9pt); line-height: 1.25; letter-spacing: .06em;
   color: var(--name-fg, #fff);
 }
 .card__sub{
