@@ -76,6 +76,12 @@
     return `${ids('common')}|${ids('premium')}`;
   }
 
+  /* 関連するものが隣り合う並び（data-master.js の groupOrder）での位置 */
+  function gIdx(s) {
+    const i = (window.SPEC_MASTER.groupOrder || []).indexOf(s.group);
+    return i < 0 ? 999 : i;
+  }
+
   function fromMaster() {
     const m = window.SPEC_MASTER;
     const pr = presetById(m.meta.labelPreset) || m.labelPresets[0];
@@ -83,8 +89,10 @@
     /* 1軸は共通・付加価値の区別を持たないので、両方を1本のリストにして
        候補として並べる。どれを載せるかは物件ごとなので既定は全てOFF。
        2軸は従来どおり（共通=既定ON / 付加価値=既定OFF） */
+    /* 1軸は関連するものが隣り合うよう、groupOrder の順に並べ直す
+       （sort は安定なので、同じ group の中は共通 → 付加価値・書いた順のまま） */
     const groups = (mode === 'single')
-      ? { common: [...m.common, ...m.premium].map((s) => item(s, false)), premium: [] }
+      ? { common: [...m.common, ...m.premium].sort((a, b) => gIdx(a) - gIdx(b)).map((s) => item(s, false)), premium: [] }
       : { common: m.common.map((s) => item(s, true)), premium: m.premium.map((s) => item(s, false)) };
     return {
       v: 6,
@@ -247,6 +255,7 @@
 
     renderList('common',  $('list-common'),  $('count-common'));
     renderList('premium', $('list-premium'), $('count-premium'));
+    if (mode === 'dual') renderPool();
   }
 
   function buildPresetSelect() {
@@ -258,29 +267,20 @@
     sel.insertAdjacentHTML('beforeend', '<option value="custom">カスタム（手入力）</option>');
   }
 
+  /* 1軸：全項目をチェックで選ぶ一覧。
+     2軸：載せた項目だけを並び順どおりに出す一覧（選ぶのは上の「仕様を選ぶ」）。
+     2軸で外した項目は state の中に on:false で残る（候補一覧から戻せる） */
   function renderList(group, ul, counter) {
     const items = state[group];
+    const dual = mode === 'dual';
     ul.innerHTML = '';
     items.forEach((it, i) => {
+      if (dual && !it.on) return;
       const li = document.createElement('li');
       li.className = 'row' + (it.on ? '' : ' row--off');
+      li.dataset.id = it.id;
 
-      const cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.checked = it.on; cb.title = '紙面に掲載する';
-      cb.onchange = () => { it.on = cb.checked; commit(); };
-
-      const th = document.createElement('span');
-      th.className = 'row__thumb';
-      th.title = 'クリックでアイコンを選択 / Shift+クリックで削除';
-      // 操作パネルは黒地なので、サムネイルは黒い紙面用の絵を出す
-      if (it.icon) th.style.backgroundImage = `url("${iconFor(it, 'dark')}")`;
-      else th.textContent = '＋';
-      /* 消したことを iconOff で覚える。覚えないと、次に開いたとき
-         マスタの絵で埋め戻されて消えない */
-      th.onclick = (ev) => {
-        if (ev.shiftKey) { it.icon = ''; it.iconOff = true; commit(); }
-        else pickImage(it);
-      };
+      const th = thumb(it);
 
       const nm = document.createElement('input');
       nm.className = 'row__name'; nm.type = 'text'; nm.value = it.name;
@@ -292,13 +292,95 @@
       sb.placeholder = '補足'; sb.title = 'カードに小さく出る補足';
       sb.onchange = () => { it.sub = sb.value; commit(); };
 
-      li.append(cb, th, nm, sb,
-        btn('↑', 'row__btn', '上へ', () => move(group, i, -1)),
-        btn('↓', 'row__btn', '下へ', () => move(group, i, +1)),
-        btn('×', 'row__btn row__btn--del', 'この行を削除', () => { items.splice(i, 1); commit(); }));
+      const up = btn('↑', 'row__btn', '上へ', () => move(group, i, -1));
+      const dn = btn('↓', 'row__btn', '下へ', () => move(group, i, +1));
+      if (dual) {
+        li.append(grip(li), th, nm, sb, up, dn,
+          btn('×', 'row__btn row__btn--del', 'この仕様を外す（上の一覧には残ります）', () => { it.on = false; commit(); }));
+      } else {
+        const cb = document.createElement('input');
+        cb.type = 'checkbox'; cb.checked = it.on; cb.title = '紙面に掲載する';
+        cb.onchange = () => { it.on = cb.checked; commit(); };
+        li.append(cb, th, nm, sb, up, dn,
+          btn('×', 'row__btn row__btn--del', 'この行を削除', () => { items.splice(i, 1); commit(); }));
+      }
       ul.appendChild(li);
     });
-    counter.textContent = `${items.filter((x) => x.on).length} / ${items.length}`;
+    if (dual && !ul.children.length) {
+      ul.insertAdjacentHTML('beforeend', '<li class="row row--empty">ここに仕様をドラッグ（または上の一覧で選ぶ）</li>');
+    }
+    counter.textContent = dual
+      ? `${items.filter((x) => x.on).length}`
+      : `${items.filter((x) => x.on).length} / ${items.length}`;
+  }
+
+  /* 2軸の候補一覧：全ての仕様を関連順に並べ、共通／付加価値のどちらに載せるかを選ぶ */
+  function renderPool() {
+    const ul = $('list-pool');
+    const all = [];
+    ['common', 'premium'].forEach((g) => state[g].forEach((it) => all.push({ it, g })));
+    const order = {};
+    const m = window.SPEC_MASTER;
+    [...m.common, ...m.premium].sort((a, b) => gIdx(a) - gIdx(b)).forEach((s, k) => { order[s.id] = k; });
+    all.forEach((x, k) => { x.k = (x.it.id in order) ? order[x.it.id] : 10000 + k; });
+    all.sort((a, b) => a.k - b.k);
+
+    ul.innerHTML = '';
+    all.forEach(({ it, g }) => {
+      const li = document.createElement('li');
+      li.className = 'row pool__row' + (it.on ? ' is-placed' : '');
+      li.dataset.id = it.id;
+      const nm = document.createElement('span');
+      nm.className = 'pool__name';
+      nm.textContent = it.name || '（名称なし）';
+      if (it.sub) nm.insertAdjacentHTML('beforeend', `<small>${esc(it.sub)}</small>`);
+      const chip = (target, label) => btn(label, 'chip' + (it.on && g === target ? ' is-on' : ''),
+        `${label}に載せる／外す`, () => {
+          if (it.on && g === target) { it.on = false; commit(); }
+          else placeItem(it.id, target, null);
+        });
+      li.append(grip(li), thumb(it), nm, chip('common', '共通'), chip('premium', '付加価値'));
+      // 画面で足した項目だけは、ここで消せる（マスタの項目は外すだけにする）
+      if (!(it.id in order)) {
+        li.append(btn('×', 'row__btn row__btn--del', 'この項目を削除', () => {
+          state[g].splice(state[g].indexOf(it), 1); commit();
+        }));
+      }
+      ul.appendChild(li);
+    });
+    $('count-pool').textContent = `${all.filter((x) => x.it.on).length} / ${all.length}`;
+  }
+
+  /* サムネイル（クリックでアイコン差し替え / Shift+クリックで削除） */
+  function thumb(it) {
+    const th = document.createElement('span');
+    th.className = 'row__thumb';
+    th.title = 'クリックでアイコンを選択 / Shift+クリックで削除';
+    // 操作パネルは黒地なので、サムネイルは黒い紙面用の絵を出す
+    if (it.icon) th.style.backgroundImage = `url("${iconFor(it, 'dark')}")`;
+    else th.textContent = '＋';
+    /* 消したことを iconOff で覚える。覚えないと、次に開いたとき
+       マスタの絵で埋め戻されて消えない */
+    th.onclick = (ev) => {
+      if (ev.shiftKey) { it.icon = ''; it.iconOff = true; commit(); }
+      else pickImage(it);
+    };
+    return th;
+  }
+
+  /* ドラッグの持ち手。行全体を常に draggable にすると、名前の入力欄で
+     文字を選ぼうとしただけで行が動いてしまうので、持ち手を押したときだけ有効にする */
+  function grip(li) {
+    const g = document.createElement('span');
+    g.className = 'row__grip'; g.textContent = '⋮⋮'; g.title = 'ドラッグで移動';
+    g.onpointerdown = () => { li.draggable = true; };
+    li.ondragstart = (e) => {
+      e.dataTransfer.setData('text/plain', li.dataset.id);
+      e.dataTransfer.effectAllowed = 'move';
+      li.classList.add('is-dragging');
+    };
+    li.ondragend = () => { li.draggable = false; li.classList.remove('is-dragging'); clearDropMarks(); };
+    return g;
   }
 
   function btn(label, cls, title, fn) {
@@ -306,12 +388,75 @@
     b.type = 'button'; b.className = cls; b.textContent = label; b.title = title; b.onclick = fn;
     return b;
   }
+  /* 隣と入れ替える。2軸の一覧は載せた項目しか出していないので、
+     外している項目は飛ばして、見えている隣と入れ替える */
   function move(group, i, d) {
-    const a = state[group], j = i + d;
+    const a = state[group];
+    let j = i + d;
+    if (mode === 'dual') while (j >= 0 && j < a.length && !a[j].on) j += d;
     if (j < 0 || j >= a.length) return;
     [a[i], a[j]] = [a[j], a[i]];
     commit();
   }
+
+  /* 項目を共通／付加価値のどちらかに載せる。beforeId の前に入れる（null なら末尾） */
+  function placeItem(id, group, beforeId) {
+    let it = null;
+    ['common', 'premium'].forEach((g) => {
+      const k = state[g].findIndex((x) => x.id === id);
+      if (k >= 0) it = state[g].splice(k, 1)[0];
+    });
+    if (!it) return;
+    it.on = true;
+    const a = state[group];
+    const at = (beforeId && beforeId !== id) ? a.findIndex((x) => x.id === beforeId) : -1;
+    if (at >= 0) a.splice(at, 0, it); else a.push(it);
+    commit();
+  }
+
+  /* ---------------- ドラッグ＆ドロップで選ぶ（2軸） ----------------
+     落とし先：共通／付加価値のリスト（落とした行の前に入る）、
+              プレビューのブロック（落としたカードの前に入る）、
+              候補一覧（外す）
+     タブレットではドラッグが効かない端末もあるので、候補一覧のボタンでも
+     同じことができるようにしてある */
+  function clearDropMarks() {
+    document.querySelectorAll('.is-drop-before, .is-drop-end, .is-over')
+      .forEach((el) => el.classList.remove('is-drop-before', 'is-drop-end', 'is-over'));
+  }
+  function rowAfter(ul, y) {
+    for (const li of ul.querySelectorAll('.row[data-id]:not(.is-dragging)')) {
+      const r = li.getBoundingClientRect();
+      if (y < r.top + r.height / 2) return li;
+    }
+    return null;
+  }
+  document.querySelectorAll('[data-drop]').forEach((ul) => {
+    const target = ul.dataset.drop;
+    ul.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      clearDropMarks();
+      ul.classList.add('is-over');
+      if (target === 'pool') return;
+      const before = rowAfter(ul, e.clientY);
+      if (before) before.classList.add('is-drop-before'); else ul.classList.add('is-drop-end');
+    });
+    ul.addEventListener('dragleave', (e) => { if (!ul.contains(e.relatedTarget)) clearDropMarks(); });
+    ul.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      clearDropMarks();
+      if (!id) return;
+      if (target === 'pool') {
+        ['common', 'premium'].forEach((g) => state[g].forEach((x) => { if (x.id === id) x.on = false; }));
+        commit();
+        return;
+      }
+      const before = rowAfter(ul, e.clientY);
+      placeItem(id, target, before ? before.dataset.id : null);
+    });
+  });
 
   /* ---------------- アイコンの選択 ---------------- */
   let pickTarget = null;
@@ -708,6 +853,27 @@
   }
   sheetEl.addEventListener('pointerup', endDrag);
   sheetEl.addEventListener('pointercancel', endDrag);
+
+  /* 一覧の行をプレビューのブロックへ落としたとき（2軸）：落としたカードの前に入れる */
+  sheetEl.addEventListener('dragover', (e) => {
+    if (mode !== 'dual') return;
+    const grid = e.target.closest('[data-group]');
+    if (!grid) return;
+    e.preventDefault();
+    clearDropMarks();
+    grid.classList.add('is-over');
+  });
+  sheetEl.addEventListener('dragleave', (e) => { if (!sheetEl.contains(e.relatedTarget)) clearDropMarks(); });
+  sheetEl.addEventListener('drop', (e) => {
+    if (mode !== 'dual') return;
+    const grid = e.target.closest('[data-group]');
+    const id = e.dataTransfer.getData('text/plain');
+    clearDropMarks();
+    if (!grid || !id) return;
+    e.preventDefault();
+    const card = e.target.closest('.card[data-id]');
+    placeItem(id, grid.dataset.group, card ? card.dataset.id : null);
+  });
 
   /* =============================================================
      表示倍率

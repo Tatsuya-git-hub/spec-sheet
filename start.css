@@ -5,7 +5,7 @@
      - ヒーローは「左に大きな明朝の見出し / 右に建物の写真」。
        写真は下に向かって白に溶かし、輪郭を見せない
      - 各パネルは .glass（白い板＋ごく細い縁＋やわらかい影）
-   色は白・黒・灰のみ。彩りは写真に任せる
+   色は白・黒・灰が基本。彩りは写真と、右上のティール（紙面の右下と同じ色）だけ
    ============================================================= */
 
 :root{
@@ -172,9 +172,22 @@ a{ color: inherit; }
     linear-gradient(90deg, transparent 84%, rgba(255,255,255,.6) 94%, var(--site-bg) 100%);
 }
 
+/* 右上の深い青緑（ティール）。紙面の右下に置いている色と同じ。
+   写真の上にかぶせて、ページの右上の角から白へ溶かす（文字・紙面モックより下の層） */
+.hero::after{
+  content: ""; position: absolute; z-index: 1; pointer-events: none;
+  top: -64px; right: 0; width: min(900px, 70vw); height: min(640px, 80vh);
+  background:
+    /* 楕円の半径＝この層の幅・高さ。左端と下端でちょうど透明になるので境目が出ない */
+    radial-gradient(100% 100% at 100% 0, rgba(12,92,98,.62), rgba(12,92,98,.26) 40%, rgba(12,92,98,.07) 70%, transparent 100%);
+}
+@media (max-width: 980px){
+  .hero::after{ top: -56px; width: 100%; height: 60vw; }
+}
+
 /* 出力イメージ（白い紙面のモック）。写真の手前、左下に浮かせて置く */
 .frame{
-  position: absolute; z-index: 1;
+  position: absolute; z-index: 2;
   left: -2%; bottom: 4%; width: 64%;
   padding: 8px; border-radius: 12px;
   background: rgba(255,255,255,.86);

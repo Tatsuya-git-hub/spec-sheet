@@ -100,6 +100,19 @@
     </div>
   </section>
 
+  <!-- 候補（2軸のみ）：全ての仕様から、共通・付加価値のどちらに載せるかを選ぶ -->
+  <section class="panel" data-dual-only>
+    <h2 class="panel__title">
+      <span>仕様を選ぶ</span>
+      <span class="counter" id="count-pool"></span>
+    </h2>
+    <p class="panel__hint">
+      全ての仕様の一覧です。「共通」「付加価値」を押すとそのブロックに載ります（もう一度押すと外れます）。
+      行の ⋮⋮ を持って、下のリストやプレビューのブロックへドラッグしても選べます。
+    </p>
+    <ul class="itemlist pool" id="list-pool" data-drop="pool"></ul>
+  </section>
+
   <!-- 仕様（1軸）／ 共通仕様（2軸） -->
   <section class="panel">
     <h2 class="panel__title">
@@ -111,13 +124,14 @@
       ドラッグして入れ替えられます。
     </p>
     <p class="panel__hint" data-dual-only>
-      標準は全て掲載。載せない項目のチェックを外します。サムネイルを押すとアイコン画像を差し替えられます（Shift+クリックで削除）。
+      載せる仕様と並び順です。↑↓ か行の ⋮⋮ のドラッグで並べ替え、付加価値仕様のリストへドラッグすると移せます。
+      × で外します（上の一覧には残ります）。サムネイルを押すとアイコン画像を差し替えられます（Shift+クリックで削除）。
     </p>
     <div class="bulk">
-      <button type="button" data-bulk="common:all">全て載せる</button>
+      <button type="button" data-bulk="common:all" data-single-only>全て載せる</button>
       <button type="button" data-bulk="common:none">全て外す</button>
     </div>
-    <ul class="itemlist" id="list-common"></ul>
+    <ul class="itemlist" id="list-common" data-drop="common"></ul>
     <button type="button" class="add" data-add="common">＋ 項目を追加</button>
   </section>
 
@@ -127,12 +141,13 @@
       <span id="head-premium">付加価値仕様</span>
       <span class="counter" id="count-premium"></span>
     </h2>
-    <p class="panel__hint">この物件で採用する仕様を選択します。</p>
+    <p class="panel__hint">
+      この物件で採用する仕様と並び順です。操作は共通仕様と同じで、共通仕様のリストへドラッグすると移せます。
+    </p>
     <div class="bulk">
-      <button type="button" data-bulk="premium:all">全て選択</button>
-      <button type="button" data-bulk="premium:none">全て解除</button>
+      <button type="button" data-bulk="premium:none">全て外す</button>
     </div>
-    <ul class="itemlist" id="list-premium"></ul>
+    <ul class="itemlist" id="list-premium" data-drop="premium"></ul>
     <button type="button" class="add" data-add="premium">＋ 項目を追加</button>
   </section>
 
