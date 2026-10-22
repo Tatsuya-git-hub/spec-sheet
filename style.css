@@ -553,7 +553,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 
 /* =============================================================
    [B-2] 白い出力テーマ（.sheet[data-theme="light"]・既定）
-   色味の方向: 白い地 × 明朝 × 完全モノクロ（金は使わない）
+   色味の方向: 白い地 × 明朝 × ディープネイビーの細い罫（彩りはこの1色だけ）
    写真の列を入れたとき、写真が白に溶けていくのが映えるよう地は真っ白。
    紙面の変数だけを上書きするので、構造・レイアウトは共通
    ============================================================= */
@@ -564,12 +564,12 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --ink-sub:   #5a5a5a;
   --line:      rgba(0,0,0,.22);
   --line-soft: rgba(0,0,0,.10);
-  --gold:      #121212;   /* 欧文・見出しの短いラインも黒に */
-  --accent-2:  #000000;   /* リード文の強調 */
+  --gold:      #22365c;   /* アクセント（ディープネイビー）：欧文・短い罫・件数・細い罫 */
+  --accent-2:  #22365c;   /* リード文の強調 */
   --lead-fg:   #2b2b2b;
   /* 白い紙面のガラス：白地の上では白の重ねが見えないので、
      下へわずかに灰色を引いて板の面を出し、縁と影で浮かせる */
-  --glass-top:    rgba(255,255,255,.88);   /* 右下のネイビーがうっすら透ける程度 */
+  --glass-top:    rgba(255,255,255,.88);   /* 地の色がうっすら透ける程度 */
   --glass-bottom: rgba(244,245,247,.82);
   --glass-edge:   rgba(20,28,40,.07);
   --glass-hi:     rgba(255,255,255,1);
@@ -580,7 +580,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
    ・外周のグレーの帯（--frame-w）に、四隅へ少しずつ沈むグレーをかける。
    ・アイコンが並ぶ内側は白いパネル（帯とパネルの境目をはっきり見せる）。
      写真もこのパネルの中に収める。
-   ・右下の濃いネイビーはパネルの中だけに置く（グレーの額にはかけない）。
+   ・パネルの中に、水色・淡いピンク・明るいグレーの色の層を重ねる（グレーの額にはかけない）。
    層の順：::before（帯のグラデ）→ ::after（白いパネル）→ 写真 → 中身
    グラデーションだけで作るので PDF でも劣化しない */
 .sheet[data-theme="light"]{
@@ -602,12 +602,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet[data-theme="light"]::after{
   content: ""; position: absolute; z-index: 0; pointer-events: none;
   inset: var(--frame-w);
-  /* 右下の濃いネイビー。グレーの額とは切り離し、パネルの右下角を中心にする */
-  background:
-    radial-gradient(130mm 92mm at 100% 100%,
-      rgba(12,24,58,.90), rgba(12,24,58,.42) 40%, rgba(12,24,58,.10) 72%, transparent 100%),
-    radial-gradient(60mm 42mm at 100% 100%, rgba(6,12,34,.50), transparent 100%),
-    var(--paper);
+  background: var(--paper);
   border-radius: var(--panel-r);
   box-shadow: 0 .6mm 2.4mm rgba(20,30,45,.10);
 }
@@ -620,6 +615,53 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 /* ぼかしの層も同じ角で丸める。overflow:hidden で切り抜くと、
    印刷で写真の縁が1本の細い線になって残るので使わない */
 .sheet[data-theme="light"].sheet--visual .sheet__visual::after{ border-top-right-radius: var(--panel-r); }
+/* パネルの色の層：写真の帯より下から始まり、温かいクリーム → 青みのグレーへ下に沈む
+   （参考：上 #e8e8e0 → 中 #d2d8d8 → 下 #bdcbd3）
+   写真の帯（--visual-h）までは完全に透明なので、写真には色がかからない */
+.sheet__tint{ display: none; }
+.sheet[data-theme="light"] .sheet__tint{
+  display: block; position: absolute; z-index: 1; pointer-events: none;
+  inset: var(--frame-w); border-radius: var(--panel-r);
+  background: linear-gradient(180deg,
+    rgba(232,232,224,0) 0,
+    rgba(232,232,224,0) calc(var(--visual-h) - 4mm),
+    rgba(232,232,224,.75) calc(var(--visual-h) + 30mm),
+    rgba(222,224,221,1) calc(var(--visual-h) + 62mm),
+    rgba(210,216,216,1) calc(var(--visual-h) + 100mm),
+    rgba(189,203,211,1) 100%);
+}
+
+/* ---- ディープネイビーの細い罫（白い紙面のアクセント）----
+   白い部分の間延びを抑えるため、上（見出し）・中（境目）・下（カード）に細い罫を散らす。
+   ★細い線に端を溶かすグラデーションを付けると、PDF に書き出したときに線ごと落ちる。
+     極細の罫は単色（薄い色）で引く */
+.sheet[data-theme="light"] .block__count{ color: var(--gold); }
+.sheet[data-theme="light"] .block__head::after{ height: .3mm; bottom: -.15mm; }
+/* 見出しの下の短い罫 */
+.sheet[data-theme="light"] .sheet__title::after{
+  content: ""; display: block; width: 12mm; height: .3mm; margin-top: 3mm; background: var(--gold);
+}
+/* 写真の消え際（リード文の下）に横罫。見出し・写真とカードの区切り */
+.sheet[data-theme="light"] .sheet__lead{
+  padding-bottom: 3.2mm; margin-bottom: 4.4mm;
+  border-bottom: .2mm solid rgba(34,54,92,.30);
+}
+/* 仕様名の上の短い罫 */
+.sheet[data-theme="light"] .card--icon .card__body::before{
+  content: ""; display: block; width: 3.2mm; height: .2mm; margin: 0 auto 1.6mm; background: var(--gold);
+}
+/* 共通と付加価値の間の縦罫（上下は溶かす。縦は長さがあるので落ちない） */
+.sheet[data-theme="light"] #block-premium{ position: relative; }
+.sheet[data-theme="light"] #block-premium::before{
+  content: ""; position: absolute; left: -3mm; top: 2mm; bottom: 0; width: .16mm;
+  background: linear-gradient(180deg, rgba(34,54,92,0), rgba(34,54,92,.65) 20%, rgba(34,54,92,.65) 80%, rgba(34,54,92,0));
+}
+/* 白いパネルの内側の極細の額縁 */
+.sheet[data-theme="light"] .sheet__tint::after{
+  content: ""; position: absolute; inset: 2.4mm; border-radius: 1.6mm;
+  border: .16mm solid rgba(34,54,92,.38);
+}
+
 /* 見出し・本文もパネルの内側から測る */
 .sheet[data-theme="light"] .sheet__head{ padding-top: calc(var(--frame-w) + 5.5mm); }
 .sheet[data-theme="light"].sheet--visual .sheet__head{ padding-top: calc(var(--frame-w) + 11mm); }
