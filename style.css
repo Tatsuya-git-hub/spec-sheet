@@ -728,7 +728,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 /* パネル：淡い青灰に、スライドと同じ「／」向きの白い帯 */
 .sheet[data-theme="light"]::after{
   background:
-    linear-gradient(68deg, transparent 16%, rgba(255,255,255,.72) 16%, rgba(255,255,255,.72) 36%, transparent 36%),
+    linear-gradient(68deg, transparent 15.8%, rgba(255,255,255,.72) 16.2%, rgba(255,255,255,.72) 35.8%, transparent 36.2%),
     var(--paper);
 }
 /* クリームの色の層は使わない（額縁の線だけ残す） */
@@ -780,7 +780,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
      ・土台：全体にうすい青をかけて、煙の写真を少し持ち上げる（帯はこれより一段明るく）
      ・真ん中から右寄りに、深い青を広げる */
   background:
-    linear-gradient(68deg, transparent 16%, rgba(140,175,240,.32) 16%, rgba(130,165,235,.22) 36%, transparent 36%),
+    linear-gradient(68deg, transparent 15.8%, rgba(140,175,240,.32) 16.2%, rgba(130,165,235,.22) 35.8%, transparent 36.2%),   /* 縁は0.4%だけぼかす（ぎざつき防止） */
     linear-gradient(rgba(110,150,225,.13), rgba(110,150,225,.13)),
     radial-gradient(62% 58% at 62% 60%, rgba(30,70,160,.34) 0%, rgba(25,55,130,.16) 45%, transparent 80%),
     #02040a var(--bg-dark, none) center / cover no-repeat;   /* 写真は app.js が data.js から入れる */
@@ -819,6 +819,8 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 /* カードの仕様名 */
 .sheet[data-theme="dark"] .card--icon,
 .sheet[data-theme="dark"] .card--text{ --name-fg: #ffffff; --sub-fg: #b9c9e4; }
+/* 仕様名は太字にしない（白い文字は細いほうが上品に見える） */
+.sheet[data-theme="dark"] .card__name{ font-weight: normal; }
 .sheet[data-theme="dark"] .card--icon .card__body::before{
   content: ""; display: block; width: 3.2mm; height: .25mm; margin: 0 auto 1.6mm;
   background: var(--gold);
