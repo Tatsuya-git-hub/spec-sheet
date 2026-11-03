@@ -680,8 +680,13 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
     inset 0 .35mm 0 #fff,
     inset .3mm 0 0 rgba(255,255,255,.85),
     inset 0 -.35mm 0 rgba(20,30,50,.07),
-    0 0 0 .18mm rgba(20,30,50,.07),
     var(--card-shadow);
+  /* 黒い紙面と同じ考え方：板の縁をディープネイビーの細い線ではっきり見せる */
+  border: .25mm solid rgba(34,54,92,.42);
+}
+/* アイコンの線にネイビーの光彩：線の形に沿って、ふんわりにじませる（黒い紙面の白い光彩の白地版） */
+.sheet[data-theme="light"] .card__icon:not(.card__icon--none){
+  filter: drop-shadow(0 0 .45mm rgba(34,54,92,.38)) drop-shadow(0 0 1.6mm rgba(60,100,170,.28));
 }
 /* アイコンカード：濃い文字（板の色は上の変数で変わる） */
 .sheet[data-theme="light"] .card--icon{
@@ -695,6 +700,147 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   --name-fg: var(--ink);
   --sub-fg: var(--ink-sub);
 }
+
+/* ---- 色味：投影スライド（明るい版）に合わせる ----
+   ・地：淡い青灰（#eef2f8）に、左から斜めに白い光の帯
+   ・見出し・仕様名・罫：ロイヤルブルー（#17458f）
+   ・欧文ラベル：アンバー（#f7a81b）／補足：青みのグレー（#5d6f8c）
+   写真の帯は app.js が左と下を透明にした画像に差し替えるので、地の帯がそのまま透ける */
+.sheet[data-theme="light"]{
+  --paper:    #eef2f8;
+  --ink:      #17458f;
+  --ink-sub:  #5d6f8c;
+  --gold:     #17458f;
+  --accent-2: #17458f;
+  --lead-fg:  #3d4f6e;
+  --line:     rgba(23,69,143,.28);
+  --line-soft:rgba(23,69,143,.12);
+  background: #c9d3e3;
+}
+.sheet[data-theme="light"]::before{
+  background:
+    /* 四隅：黒い紙面と同じ色の流れ（深い紺 → 明るい青 → 額の地） */
+    radial-gradient(120mm 90mm at 0 0,       #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
+    radial-gradient(120mm 90mm at 100% 0,    #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
+    radial-gradient(120mm 90mm at 0 100%,    #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
+    radial-gradient(120mm 90mm at 100% 100%, #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%);
+}
+/* パネル：淡い青灰に、スライドと同じ「／」向きの白い帯 */
+.sheet[data-theme="light"]::after{
+  background:
+    linear-gradient(68deg, transparent 16%, rgba(255,255,255,.72) 16%, rgba(255,255,255,.72) 36%, transparent 36%),
+    var(--paper);
+}
+/* クリームの色の層は使わない（額縁の線だけ残す） */
+.sheet[data-theme="light"] .sheet__tint{ background: none; }
+.sheet[data-theme="light"] .sheet__tint::after{ border-color: rgba(23,69,143,.30); }
+.sheet[data-theme="light"] .sheet__visual--baked::after{ display: none; }
+/* 欧文ラベルはアンバー */
+.sheet[data-theme="light"] .sheet__en,
+.sheet[data-theme="light"] .block__en{ color: #f7a81b; letter-spacing: .6em; }
+.sheet[data-theme="light"] .sheet__lead{ border-bottom-color: rgba(23,69,143,.28); }
+.sheet[data-theme="light"] #block-premium::before{
+  background: linear-gradient(180deg, rgba(23,69,143,0), rgba(23,69,143,.6) 20%, rgba(23,69,143,.6) 80%, rgba(23,69,143,0));
+}
+/* カード：白い板にロイヤルブルーの細い縁、アイコンには青い光彩 */
+.sheet[data-theme="light"] .card:not(.card--filler){ border-color: rgba(23,69,143,.40); }
+.sheet[data-theme="light"] .card__icon:not(.card__icon--none){
+  filter: drop-shadow(0 0 .3mm rgba(23,69,143,.20)) drop-shadow(0 0 1.2mm rgba(40,100,200,.12));
+}
+
+/* =============================================================
+   [B-4] 黒い出力テーマ（.sheet[data-theme="dark"]）
+   参考：投影スライド（ダーク版）
+   ・地：濃紺の煙の写真（images/bg/dark.jpg → data.js に埋め込み）。右上から光が斜めに差す
+   ・斜めの青い光の帯（白い紙面の白い帯と同じ位置・角度）
+   ・文字：見出しは白、補足は青みのグレー（#b9c9e4）
+   ・彩り：アンバー（#f7a81b）を欧文ラベルと短い罫だけに
+   ・線：白の極細（半透明）。見出し下の罫、右下の縦罫、ブロック間の縦罫
+   紙面の変数と飾りだけを上書きするので、構造・レイアウトは共通
+   ============================================================= */
+.sheet[data-theme="dark"]{
+  --paper:     #040814;   /* 写真の帯が溶けていく先（背景の上のほうの色） */
+  --paper-2:   #0a1226;
+  --ink:       #ffffff;
+  --ink-sub:   #b9c9e4;
+  --line:      rgba(255,255,255,.34);
+  --line-soft: rgba(255,255,255,.16);
+  --gold:      #f7a81b;   /* アンバー */
+  --accent-2:  #f7a81b;
+  --lead-fg:   rgba(225,233,246,.88);
+  /* カード：青みの白をうすく重ねたガラス */
+  --glass-top:    rgba(12,22,48,.72);
+  --glass-bottom: rgba(4,9,22,.82);
+  --glass-edge:   rgba(255,255,255,.62);
+  --glass-hi:     rgba(255,255,255,.22);
+  --card-shadow:      0 1.4mm 3.6mm rgba(0,2,10,.55), 0 .3mm .8mm rgba(0,2,10,.35);
+  --card-shadow-soft: 0 .8mm 2.4mm rgba(0,2,10,.35);
+  /* 背景写真の上に重ねる層（どれも写真の帯より下の層なので、帯には色がかからない）
+     ・斜めの光の帯：明るい方の白い帯と同じ位置・角度（左上から右下へ「＼」）
+     ・土台：全体にうすい青をかけて、煙の写真を少し持ち上げる（帯はこれより一段明るく）
+     ・真ん中から右寄りに、深い青を広げる */
+  background:
+    linear-gradient(68deg, transparent 16%, rgba(140,175,240,.32) 16%, rgba(130,165,235,.22) 36%, transparent 36%),
+    linear-gradient(rgba(110,150,225,.13), rgba(110,150,225,.13)),
+    radial-gradient(62% 58% at 62% 60%, rgba(30,70,160,.34) 0%, rgba(25,55,130,.16) 45%, transparent 80%),
+    #02040a var(--bg-dark, none) center / cover no-repeat;   /* 写真は app.js が data.js から入れる */
+}
+/* 写真の帯は app.js が左と下を透明にした画像に差し替えるので、色のぼかしはかぶせない */
+.sheet[data-theme="dark"] .sheet__visual--baked::after{ display: none; }
+/* 右下の縦の細い罫（スライドの右下と同じ） */
+.sheet[data-theme="dark"]::after{
+  content: ""; position: absolute; z-index: 2; pointer-events: none;
+  right: 4.5mm; bottom: 0; width: .2mm; height: 30mm;
+  background: rgba(255,255,255,.45);
+}
+/* 見出し：下に白の細い罫（見出しの幅より少し長く） */
+.sheet[data-theme="dark"] .sheet__head{ border-bottom: 0; }
+.sheet[data-theme="dark"] .sheet__en{ letter-spacing: .6em; }
+.sheet[data-theme="dark"] .sheet__title::after{
+  content: ""; display: block; width: calc(100% + 14mm); height: .2mm; margin-top: 3.4mm;
+  background: rgba(255,255,255,.50);
+}
+.sheet[data-theme="dark"] .sheet__prop{ color: var(--ink-sub); letter-spacing: .14em; }
+/* ブロック見出し */
+.sheet[data-theme="dark"] .block__en{ letter-spacing: .6em; }
+.sheet[data-theme="dark"] .block__head{ border-bottom: .2mm solid rgba(255,255,255,.22); }
+.sheet[data-theme="dark"] .block__head::after{ height: .3mm; bottom: -.2mm; width: 12mm; }
+/* 件数：スライドの時刻と同じ、白の細い枠で囲む */
+.sheet[data-theme="dark"] .block__count{
+  color: #fff; letter-spacing: .2em;
+  padding: .7mm 2.4mm .6mm; border: .2mm solid rgba(255,255,255,.55);
+}
+/* ブロックの間に縦の細い罫（スライドの左の縦罫） */
+.sheet[data-theme="dark"] #block-premium{ position: relative; }
+.sheet[data-theme="dark"] #block-premium::before{
+  content: ""; position: absolute; left: -3mm; top: 2mm; bottom: 0; width: .2mm;
+  background: rgba(255,255,255,.40);
+}
+/* カードの仕様名 */
+.sheet[data-theme="dark"] .card--icon,
+.sheet[data-theme="dark"] .card--text{ --name-fg: #ffffff; --sub-fg: #b9c9e4; }
+.sheet[data-theme="dark"] .card--icon .card__body::before{
+  content: ""; display: block; width: 3.2mm; height: .25mm; margin: 0 auto 1.6mm;
+  background: var(--gold);
+}
+.sheet[data-theme="dark"] .card:not(.card--filler){
+  /* 深い紺の黒ガラス。明るい煙の上に濃い板を浮かせ、白い線のアイコンとの差で読ませる。
+     左上から細い艶を一筋だけ入れる（白くぼかさない） */
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 30%),
+    linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+  border: .25mm solid var(--glass-edge);
+  box-shadow: inset 0 .25mm 0 var(--glass-hi), 0 1.6mm 4mm rgba(0,2,10,.60);
+}
+/* アイコンの線に白い光彩：線の形に沿って、ふんわりにじませる（輪郭は立てない） */
+.sheet[data-theme="dark"] .card__icon:not(.card__icon--none){
+  filter: drop-shadow(0 0 .5mm rgba(255,255,255,.55)) drop-shadow(0 0 1.6mm rgba(170,200,255,.35));
+}
+/* 背景も少しだけ持ち上げる（写真の帯より下だけ） */
+.sheet[data-theme="dark"]::before{
+  background: none;
+}
+.sheet[data-theme="dark"] .card__icon--none::after{ color: rgba(185,201,228,.35); }
 
 /* =============================================================
    [B-3] 小さい画面（タブレット・スマホ）
@@ -760,7 +906,7 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
   html, body{ height: auto; display: block; background: #fff; }
   /* 紙面は2ページ目を防ぐため 0.4mm 短く刷るので、下端にその分だけ地が見える。
      黒い紙面のときは地も黒にして、白い筋を出さない */
-  html:has(.sheet[data-theme="dark"]), html:has(.sheet[data-theme="dark"]) body{ background: #070b0c; }
+  html:has(.sheet[data-theme="dark"]), html:has(.sheet[data-theme="dark"]) body{ background: #02040a; }
   /* 紙面は用紙より 0.4mm ほど短く刷られるので、余りをグレーの帯の色でうめる */
   html:has(.sheet[data-theme="light"]), html:has(.sheet[data-theme="light"]) body{ background: #d9dadd; }
   .editor, .stage__bar{ display: none !important; }

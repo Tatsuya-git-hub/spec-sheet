@@ -520,6 +520,44 @@
     setHero(e.dataTransfer.files && e.dataTransfer.files[0]);
   });
 
+  /* 写真の帯：写真そのものの左と下を透明にして、下の地（煙の写真や斜めの白い帯）を透かす。
+     「地の色をかぶせて溶かす」と、地に模様があるところで帯の下端・左端に段差が出る。mask-image は印刷（PDF）で落ちることがあるので、
+     canvas で透明度を焼き込んだ画像に差し替える（CSS のぼかしと同じ割合） */
+  const baked = new Map();
+  function bakeVisual(hero) {
+    const el = $('sheet-visual');
+    const on = !!hero;
+    el.classList.toggle('sheet__visual--baked', on);
+    if (!on) return;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    if (!w || !h) return;
+    const key = `${hero}|${w}x${h}`;
+    if (baked.has(key)) { el.style.backgroundImage = `url('${baked.get(key)}')`; return; }
+    el.style.backgroundImage = 'none';
+    const img = new Image();
+    img.onload = () => {
+      const S = 3;   // 印刷でも粗くならないよう3倍で描く
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(w * S); cv.height = Math.round(h * S);
+      const g = cv.getContext('2d');
+      // background-size: cover / position: 50% 52% と同じ切り抜き
+      const r = Math.max(cv.width / img.width, cv.height / img.height);
+      const dw = img.width * r, dh = img.height * r;
+      g.drawImage(img, (cv.width - dw) * 0.5, (cv.height - dh) * 0.52, dw, dh);
+      g.globalCompositeOperation = 'destination-in';
+      const fade = (gr, stops) => {
+        stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(0,0,0,${a})`));
+        g.fillStyle = gr; g.fillRect(0, 0, cv.width, cv.height);
+      };
+      fade(g.createLinearGradient(0, 0, cv.width, 0), [[0, 0], [.09, .14], [.20, .45], [.32, .78], [.44, 1], [1, 1]]);
+      fade(g.createLinearGradient(0, 0, 0, cv.height), [[0, 1], [.14, 1], [.32, .72], [.50, .38], [.68, .12], [.88, 0], [1, 0]]);
+      const url = cv.toDataURL('image/webp', 0.9);
+      baked.set(key, url);
+      if (el.classList.contains('sheet__visual--baked') && heroSrc() === hero) el.style.backgroundImage = `url('${url}')`;
+    };
+    img.src = hero;
+  }
+
   /* =============================================================
      紙面
      ============================================================= */
@@ -527,6 +565,9 @@
     // --- 出力テーマ ---
     const sheetEl = $('sheet');
     sheetEl.dataset.theme = state.theme;
+    // 黒い紙面の地の写真は data.js に埋め込んであるので、CSS 変数で渡す
+    const bgDark = window.SPEC_MASTER.meta.bgDark;
+    if (bgDark) sheetEl.style.setProperty('--bg-dark', `url("${bgDark}")`);
 
     /* --- 写真（上の帯・見出しの右）---
        帯があるかどうかでカードの入る高さが変わるので、レイアウト計算より先に決める */
@@ -561,6 +602,7 @@
       const hr = $('sheet-title').parentElement.getBoundingClientRect();
       sheetEl.style.setProperty('--visual-left', `${((hr.right - sr.left) / k).toFixed(1)}px`);
     }
+    bakeVisual(hero);
     $('sheet-prop').textContent    = state.prop;
     $('sheet-lead').innerHTML      = leadHtml(state.lead);
     $('en-common').textContent     = state.commonEn;
