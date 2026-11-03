@@ -720,10 +720,10 @@ body.is-reordering{ user-select: none; -webkit-user-select: none; }
 .sheet[data-theme="light"]::before{
   background:
     /* 四隅：黒い紙面と同じ色の流れ（深い紺 → 明るい青 → 額の地） */
-    radial-gradient(120mm 90mm at 0 0,       #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
-    radial-gradient(120mm 90mm at 100% 0,    #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
-    radial-gradient(120mm 90mm at 0 100%,    #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%),
-    radial-gradient(120mm 90mm at 100% 100%, #040814 0%, rgba(14,34,84,.92) 22%, rgba(30,70,160,.45) 48%, transparent 78%);
+    radial-gradient(120mm 90mm at 0 0,       rgba(16,34,78,.62) 0%, rgba(24,52,120,.42) 24%, rgba(40,80,170,.18) 50%, transparent 78%),
+    radial-gradient(120mm 90mm at 100% 0,    rgba(16,34,78,.62) 0%, rgba(24,52,120,.42) 24%, rgba(40,80,170,.18) 50%, transparent 78%),
+    radial-gradient(120mm 90mm at 0 100%,    rgba(16,34,78,.62) 0%, rgba(24,52,120,.42) 24%, rgba(40,80,170,.18) 50%, transparent 78%),
+    radial-gradient(120mm 90mm at 100% 100%, rgba(16,34,78,.62) 0%, rgba(24,52,120,.42) 24%, rgba(40,80,170,.18) 50%, transparent 78%);
 }
 /* パネル：淡い青灰に、スライドと同じ「／」向きの白い帯 */
 .sheet[data-theme="light"]::after{
